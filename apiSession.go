@@ -105,3 +105,28 @@ func (c *Client) GetSession(httpClient *http.Client) (sessionInfoResponse, error
 		return sessionInfoResponse{}, fmt.Errorf("%s", err.Error)
 	}
 }
+
+// ChangePassword changes password for the current user.
+// It requires an http.Client pointer to make the request to Nessus.
+func (c *Client) ChangePassword(httpClient *http.Client, newPassword string) (bool, error) {
+	c.debugln("ChangePassword(): Building change password URL")
+	url := fmt.Sprintf("https://%s:%s/session/chpasswd", c.ip, c.port)
+
+	newPasswordJSON := []byte(fmt.Sprintf(`{"password":"%s"}`, newPassword))
+
+	statusCode, body, err := c.putWithJSON(httpClient, url, []byte(newPasswordJSON))
+	if err != nil {
+		return false, err
+	}
+
+	switch statusCode {
+	case 200:
+		c.debugln("ChangePassword(): Successfully changed password.")
+		return true, nil
+	default:
+		var err errorResponse
+		json.Unmarshal(body, &err)
+		c.debugln("ChangePassword(): Password could not be changed.")
+		return false, fmt.Errorf("%s", err.Error)
+	}
+}

@@ -65,6 +65,11 @@ func TestEditSession(t *testing.T) {
 		port:     port,
 	}
 
+	client, err := client.CreateSession(httpClient)
+	if err != nil {
+		t.FailNow()
+	}
+
 	session, err := client.EditSession(httpClient, `{"name":"Test User","email":"test.user@gmail.com"}`)
 	if err != nil || session.Username != "test" {
 		t.FailNow()
@@ -132,6 +137,38 @@ func TestGetSession(t *testing.T) {
 
 	session, err := client.GetSession(httpClient)
 	if err != nil || session.Username != "test" {
+		t.FailNow()
+	}
+}
+
+func TestChangePassword(t *testing.T) {
+	testServer := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintln(w, "")
+	}))
+	defer testServer.Close()
+
+	transport := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+
+	httpClient := &http.Client{Transport: transport}
+
+	port := strings.Split(testServer.URL, ":")[2]
+
+	client := &Client{
+		username: "testU",
+		password: "testP",
+		ip:       "127.0.0.1",
+		port:     port,
+	}
+
+	client, err := client.CreateSession(httpClient)
+	if err != nil {
+		t.FailNow()
+	}
+
+	changed, err := client.ChangePassword(httpClient, "n3wT3stP4ssw0rd!")
+	if err != nil || changed != true {
 		t.FailNow()
 	}
 }
