@@ -31,8 +31,8 @@ func TestPostWithArgs(t *testing.T) {
 
 	httpClient := &http.Client{Transport: transportSettings}
 
-	body, err := client.postWithJSON(httpClient, testServer.URL, jsonStr)
-	if err != nil {
+	statusCode, body, err := client.postWithJSON(httpClient, testServer.URL, jsonStr)
+	if err != nil || statusCode != 200 {
 		t.FailNow()
 	}
 
