@@ -1,4 +1,4 @@
-package client
+package nessus
 
 // Client represents the API client which is used to interact with the
 // Nessus API. It supports either Username/Password or Access/Secret key pairs.

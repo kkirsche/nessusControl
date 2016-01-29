@@ -1,4 +1,4 @@
-package client
+package nessus
 
 // NewUsernameClient creates a new Nessus API Client structure using a
 // combination of username and password.

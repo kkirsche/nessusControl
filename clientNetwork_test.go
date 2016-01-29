@@ -1,4 +1,4 @@
-package client
+package nessus
 
 import (
 	"crypto/tls"

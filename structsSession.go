@@ -1,4 +1,4 @@
-package client
+package nessus
 
 // The response from Nessus when CreateSession() is called.
 type createSessionResponse struct {
