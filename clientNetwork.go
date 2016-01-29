@@ -6,7 +6,11 @@ import (
 	"net/http"
 )
 
-func (c *Client) postWithArgs(httpClient *http.Client, url string, jsonStr []byte) ([]byte, error) {
+// postWithArgs takes an http.Client pointer, URL, and JSON byte array,
+// sends a POST request to the server, and then returns the response body as a
+// byte array with a nil error. Otherwise, the array will be nil and an error
+// will be passed
+func (c *Client) postWithJSON(httpClient *http.Client, url string, jsonStr []byte) ([]byte, error) {
 	c.debugln("postWithArgs(): Creating new request")
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
 	if err != nil {

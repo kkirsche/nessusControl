@@ -34,7 +34,7 @@ func TestCreateSession(t *testing.T) {
 
 	client := Client{}
 
-	body, err := client.postWithArgs(httpClient, testServer.URL, jsonStr)
+	body, err := client.postWithJSON(httpClient, testServer.URL, jsonStr)
 	if err != nil {
 		t.FailNow()
 	}
