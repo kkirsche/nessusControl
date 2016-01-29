@@ -44,9 +44,7 @@ func TestCreateSession(t *testing.T) {
 
 func TestDeleteSession(t *testing.T) {
 	testServer := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		response := `{"token": "TestToken"}`
-		fmt.Fprintln(w, response)
+		fmt.Fprintln(w, "")
 	}))
 	defer testServer.Close()
 

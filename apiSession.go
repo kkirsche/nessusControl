@@ -15,18 +15,28 @@ func (c *Client) CreateSession(httpClient *http.Client) (*Client, error) {
 	jsonStr := []byte(fmt.Sprintf(`{"username":"%s","password":"%s"}`, c.username, c.password))
 	c.debugln("CreateSession(): Creating HTTP request")
 
-	body, err := c.postWithJSON(httpClient, url, jsonStr)
+	statusCode, body, err := c.postWithJSON(httpClient, url, jsonStr)
 	if err != nil {
 		return nil, err
 	}
 
-	var session createSessionResponse
-	json.Unmarshal(body, &session)
-	c.debugln("CreateSession(): Received token " + session.Token)
-	c.token = session.Token
-	return c, nil
+	switch statusCode {
+	case 200:
+		var session createSessionResponse
+		json.Unmarshal(body, &session)
+		c.debugln("CreateSession(): Received token " + session.Token)
+		c.token = session.Token
+		return c, nil
+	default:
+		var err errorResponse
+		json.Unmarshal(body, &err)
+		c.debugln("CreateSession(): Session could not be created.")
+		return nil, fmt.Errorf("%s", err.Error)
+	}
 }
 
+// DestroySession logs the current user out and destroys the session.
+// It requires an http.Client pointer to make the request to Nessus.
 func (c *Client) DestroySession(httpClient *http.Client) (bool, error) {
 	c.debugln("DestroySession(): Creating new client with username and password")
 	url := fmt.Sprintf("https://%s:%s/session", c.ip, c.port)
@@ -41,13 +51,10 @@ func (c *Client) DestroySession(httpClient *http.Client) (bool, error) {
 	case 200:
 		c.debugln("DestroySession(): Session destroyed.")
 		return true, nil
-	case 401:
+	default:
 		var err errorResponse
 		json.Unmarshal(body, &err)
 		c.debugln("DestroySession(): Session could not be destroyed.")
-		log.Print(err.Error)
 		return false, fmt.Errorf("%s", err.Error)
 	}
-
-	return false, nil
 }

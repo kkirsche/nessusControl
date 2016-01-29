@@ -11,11 +11,11 @@ import (
 // sends a POST request to the server, and then returns the response body as a
 // byte array with a nil error. Otherwise, the array will be nil and an error
 // will be passed
-func (c *Client) postWithJSON(httpClient *http.Client, url string, jsonStr []byte) ([]byte, error) {
+func (c *Client) postWithJSON(httpClient *http.Client, url string, jsonStr []byte) (int, []byte, error) {
 	c.debugln("postWithJSON(): Creating new request")
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
 	if err != nil {
-		return nil, err
+		return 0, nil, err
 	}
 	req.Header.Set("Content-Type", "application/json")
 
@@ -31,17 +31,17 @@ func (c *Client) postWithJSON(httpClient *http.Client, url string, jsonStr []byt
 	c.debugln("postWithJSON(): Executing request")
 	resp, err := httpClient.Do(req)
 	if err != nil {
-		return nil, err
+		return 0, nil, err
 	}
 	defer resp.Body.Close()
 
 	c.debugln("postWithJSON(): Reading body of response")
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return nil, err
+		return 0, nil, err
 	}
 
-	return body, nil
+	return resp.StatusCode, body, nil
 }
 
 func (c *Client) delete(httpClient *http.Client, url string) (int, []byte, error) {
