@@ -36,7 +36,7 @@ func TestPostWithArgs(t *testing.T) {
 		t.FailNow()
 	}
 
-	var session createSession
+	var session createSessionResponse
 	json.Unmarshal(body, &session)
 	if session.Token != "TestToken" {
 		t.FailNow()

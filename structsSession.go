@@ -1,6 +1,10 @@
 package client
 
 // The response from Nessus when CreateSession() is called.
-type createSession struct {
+type createSessionResponse struct {
 	Token string `json:"token"`
+}
+
+type errorResponse struct {
+	Error string `json:"error"`
 }

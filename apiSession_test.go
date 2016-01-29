@@ -2,16 +2,15 @@ package client
 
 import (
 	"crypto/tls"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
-	"net/url"
+	"strings"
 	"testing"
 )
 
 func TestCreateSession(t *testing.T) {
-	testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	testServer := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		response := `{"token": "TestToken"}`
 		fmt.Fprintln(w, response)
@@ -19,29 +18,59 @@ func TestCreateSession(t *testing.T) {
 	defer testServer.Close()
 
 	transport := &http.Transport{
-		Proxy: func(req *http.Request) (*url.URL, error) {
-			return url.Parse(testServer.URL)
-		},
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
 
 	httpClient := &http.Client{Transport: transport}
 
-	jsonStr, err := json.Marshal(`{"username": "testU", "password": "testP"}`)
+	port := strings.Split(testServer.URL, ":")[2]
+
+	client := &Client{
+		username: "testU",
+		password: "testP",
+		ip:       "127.0.0.1",
+		port:     port,
+	}
+
+	client, err := client.CreateSession(httpClient)
 	if err != nil {
 		t.FailNow()
 	}
 
-	client := Client{}
+	if client.token != "TestToken" {
+		t.FailNow()
+	}
+}
 
-	body, err := client.postWithJSON(httpClient, testServer.URL, jsonStr)
+func TestDeleteSession(t *testing.T) {
+	testServer := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		response := `{"token": "TestToken"}`
+		fmt.Fprintln(w, response)
+	}))
+	defer testServer.Close()
+
+	transport := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+
+	port := strings.Split(testServer.URL, ":")[2]
+
+	client := &Client{
+		username: "testU",
+		password: "testP",
+		ip:       "127.0.0.1",
+		port:     port,
+	}
+
+	httpClient := &http.Client{Transport: transport}
+	client, err := client.CreateSession(httpClient)
 	if err != nil {
 		t.FailNow()
 	}
 
-	var session createSession
-	json.Unmarshal(body, &session)
-	if session.Token != "TestToken" {
+	resp, err := client.DestroySession(httpClient)
+	if err != nil || resp != true {
 		t.FailNow()
 	}
 }
