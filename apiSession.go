@@ -9,10 +9,9 @@ import (
 // CreateSession creates a new session token for the given user/password within
 // Client. It requires an http.Client pointer to make the request to Nessus.
 func (c *Client) CreateSession(httpClient *http.Client) (*Client, error) {
-	c.debugln("CreateSession(): Creating new client with username and password")
+	c.debugln("CreateSession(): Building session URL")
 	url := fmt.Sprintf("https://%s:%s/session", c.ip, c.port)
 	jsonStr := []byte(fmt.Sprintf(`{"username":"%s","password":"%s"}`, c.username, c.password))
-	c.debugln("CreateSession(): Creating HTTP request")
 
 	statusCode, body, err := c.postWithJSON(httpClient, url, jsonStr)
 	if err != nil {
@@ -34,13 +33,37 @@ func (c *Client) CreateSession(httpClient *http.Client) (*Client, error) {
 	}
 }
 
+// EditSession changes settings for the current user..
+// It requires an http.Client pointer to make the request to Nessus.
+func (c *Client) EditSession(httpClient *http.Client, updateJSON string) (editSessionResponse, error) {
+	c.debugln("EditSession(): Building edit session URL")
+	url := fmt.Sprintf("https://%s:%s/session", c.ip, c.port)
+
+	statusCode, body, err := c.putWithJSON(httpClient, url, []byte(updateJSON))
+	if err != nil {
+		return editSessionResponse{}, err
+	}
+
+	switch statusCode {
+	case 200:
+		var session editSessionResponse
+		json.Unmarshal(body, &session)
+		c.debugln("EditSession(): Successfully update session.")
+		return session, nil
+	default:
+		var err errorResponse
+		json.Unmarshal(body, &err)
+		c.debugln("EditSession(): Session could not be created.")
+		return editSessionResponse{}, fmt.Errorf("%s", err.Error)
+	}
+}
+
 // DestroySession logs the current user out and destroys the session.
 // It requires an http.Client pointer to make the request to Nessus.
 func (c *Client) DestroySession(httpClient *http.Client) (bool, error) {
-	c.debugln("DestroySession(): Creating new client with username and password")
+	c.debugln("DestroySession(): Building destroy session URL")
 	url := fmt.Sprintf("https://%s:%s/session", c.ip, c.port)
 
-	c.debugln("DestroySession(): Creating HTTP request")
 	statusCode, body, err := c.delete(httpClient, url)
 	if err != nil {
 		return false, err
