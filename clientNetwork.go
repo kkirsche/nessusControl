@@ -41,6 +41,40 @@ func (c *Client) delete(httpClient *http.Client, url string) (int, []byte, error
 	return resp.StatusCode, body, err
 }
 
+// get take an http.Client pointer and URL and sends a GET request to the
+// server.
+func (c *Client) get(httpClient *http.Client, url string) (int, []byte, error) {
+	c.debugln("get(): Creating new request")
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return 0, nil, err
+	}
+
+	if c.token != "" {
+		req.Header.Set("X-Cookie", "token="+c.token)
+	}
+
+	if c.accessKey != "" && c.secretKey != "" {
+		header := fmt.Sprintf("accessKey=%s; secretKey=%s;", c.accessKey, c.secretKey)
+		req.Header.Set("X-ApiKeys", header)
+	}
+
+	c.debugln("get(): Executing request")
+	resp, err := httpClient.Do(req)
+	if err != nil {
+		return resp.StatusCode, nil, err
+	}
+	defer resp.Body.Close()
+
+	c.debugln("get(): Reading body of response")
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return resp.StatusCode, nil, err
+	}
+
+	return resp.StatusCode, body, err
+}
+
 // postWithArgs takes an http.Client pointer, URL, and JSON byte array,
 // sends a POST request to the server, and then returns the response body as a
 // byte array with a nil error. Otherwise, the array will be nil and an error

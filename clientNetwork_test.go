@@ -97,3 +97,26 @@ func TestDelete(t *testing.T) {
 		t.FailNow()
 	}
 }
+
+func TestGet(t *testing.T) {
+	testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		unmarshalledJSON := `{"example": "test"}`
+		fmt.Fprintln(w, unmarshalledJSON)
+	}))
+	defer testServer.Close()
+
+	client := Client{}
+
+	// Ignore bad HTTPS certificate
+	transportSettings := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+
+	httpClient := &http.Client{Transport: transportSettings}
+
+	statusCode, _, err := client.get(httpClient, testServer.URL)
+	if err != nil || statusCode != 200 {
+		t.FailNow()
+	}
+}

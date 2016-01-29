@@ -9,7 +9,7 @@ type errorResponse struct {
 	Error string `json:"error"`
 }
 
-type editSessionResponse struct {
+type sessionInfoResponse struct {
 	Connectors      interface{} `json:"connectors"`
 	ContainerID     int         `json:"container_id"`
 	Email           string      `json:"email"`

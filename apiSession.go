@@ -33,31 +33,6 @@ func (c *Client) CreateSession(httpClient *http.Client) (*Client, error) {
 	}
 }
 
-// EditSession changes settings for the current user..
-// It requires an http.Client pointer to make the request to Nessus.
-func (c *Client) EditSession(httpClient *http.Client, updateJSON string) (editSessionResponse, error) {
-	c.debugln("EditSession(): Building edit session URL")
-	url := fmt.Sprintf("https://%s:%s/session", c.ip, c.port)
-
-	statusCode, body, err := c.putWithJSON(httpClient, url, []byte(updateJSON))
-	if err != nil {
-		return editSessionResponse{}, err
-	}
-
-	switch statusCode {
-	case 200:
-		var session editSessionResponse
-		json.Unmarshal(body, &session)
-		c.debugln("EditSession(): Successfully update session.")
-		return session, nil
-	default:
-		var err errorResponse
-		json.Unmarshal(body, &err)
-		c.debugln("EditSession(): Session could not be created.")
-		return editSessionResponse{}, fmt.Errorf("%s", err.Error)
-	}
-}
-
 // DestroySession logs the current user out and destroys the session.
 // It requires an http.Client pointer to make the request to Nessus.
 func (c *Client) DestroySession(httpClient *http.Client) (bool, error) {
@@ -78,5 +53,55 @@ func (c *Client) DestroySession(httpClient *http.Client) (bool, error) {
 		json.Unmarshal(body, &err)
 		c.debugln("DestroySession(): Session could not be destroyed.")
 		return false, fmt.Errorf("%s", err.Error)
+	}
+}
+
+// EditSession changes settings for the current user.
+// It requires an http.Client pointer to make the request to Nessus.
+func (c *Client) EditSession(httpClient *http.Client, updateJSON string) (sessionInfoResponse, error) {
+	c.debugln("EditSession(): Building edit session URL")
+	url := fmt.Sprintf("https://%s:%s/session", c.ip, c.port)
+
+	statusCode, body, err := c.putWithJSON(httpClient, url, []byte(updateJSON))
+	if err != nil {
+		return sessionInfoResponse{}, err
+	}
+
+	switch statusCode {
+	case 200:
+		var session sessionInfoResponse
+		json.Unmarshal(body, &session)
+		c.debugln("EditSession(): Successfully update session.")
+		return session, nil
+	default:
+		var err errorResponse
+		json.Unmarshal(body, &err)
+		c.debugln("EditSession(): Session could not be created.")
+		return sessionInfoResponse{}, fmt.Errorf("%s", err.Error)
+	}
+}
+
+// GetSession returns the user session data.
+// It requires an http.Client pointer to make the request to Nessus.
+func (c *Client) GetSession(httpClient *http.Client) (sessionInfoResponse, error) {
+	c.debugln("GetSession(): Building edit session URL")
+	url := fmt.Sprintf("https://%s:%s/session", c.ip, c.port)
+
+	statusCode, body, err := c.get(httpClient, url)
+	if err != nil {
+		return sessionInfoResponse{}, err
+	}
+
+	switch statusCode {
+	case 200:
+		var session sessionInfoResponse
+		json.Unmarshal(body, &session)
+		c.debugln("GetSession(): Successfully retrieved session.")
+		return session, nil
+	default:
+		var err errorResponse
+		json.Unmarshal(body, &err)
+		c.debugln("EditSession(): Session could not be retrieved.")
+		return sessionInfoResponse{}, fmt.Errorf("%s", err.Error)
 	}
 }
