@@ -130,3 +130,28 @@ func (c *Client) ChangePassword(httpClient *http.Client, newPassword string) (bo
 		return false, fmt.Errorf("%s", err.Error)
 	}
 }
+
+// GenerateAPIKeys generates API Keys for the current user.
+// It requires an http.Client pointer to make the request to Nessus.
+func (c *Client) GenerateAPIKeys(httpClient *http.Client) (newAPIKeys, error) {
+	c.debugln("GenerateAPIKeys(): Building generate API Keys URL")
+	url := fmt.Sprintf("https://%s:%s/session/keys", c.ip, c.port)
+
+	statusCode, body, err := c.put(httpClient, url)
+	if err != nil {
+		return newAPIKeys{}, err
+	}
+
+	switch statusCode {
+	case 200:
+		var apiKeys newAPIKeys
+		json.Unmarshal(body, &apiKeys)
+		c.debugln("ChangePassword(): Successfully generated API keys.")
+		return apiKeys, nil
+	default:
+		var err errorResponse
+		json.Unmarshal(body, &err)
+		c.debugln("ChangePassword(): API Keys could not be generated.")
+		return newAPIKeys{}, fmt.Errorf("%s", err.Error)
+	}
+}

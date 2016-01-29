@@ -112,7 +112,7 @@ func (c *Client) postWithJSON(httpClient *http.Client, url string, jsonStr []byt
 	return resp.StatusCode, body, nil
 }
 
-// postWithArgs takes an http.Client pointer, URL, and JSON byte array,
+// putWithJSON takes an http.Client pointer, URL, and JSON byte array,
 // sends a PUT request to the server, and then returns the response body as a
 // byte array with a nil error. Otherwise, the array will be nil and an error
 // will be passed
@@ -134,6 +134,42 @@ func (c *Client) putWithJSON(httpClient *http.Client, url string, jsonStr []byte
 	}
 
 	c.debugln("putWithJSON(): Executing request")
+	resp, err := httpClient.Do(req)
+	if err != nil {
+		return 0, nil, err
+	}
+	defer resp.Body.Close()
+
+	c.debugln("putWithJSON(): Reading body of response")
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return 0, nil, err
+	}
+
+	return resp.StatusCode, body, nil
+}
+
+// put takes an http.Client pointer and URL,the sends a PUT request to the
+// server, and then returns the response body as a byte array with a nil error.
+// Otherwise, the array will be nil and an error
+// will be passed
+func (c *Client) put(httpClient *http.Client, url string) (int, []byte, error) {
+	c.debugln("put(): Creating new request")
+	req, err := http.NewRequest("PUT", url, nil)
+	if err != nil {
+		return 0, nil, err
+	}
+
+	if c.token != "" {
+		req.Header.Set("X-Cookie", "token="+c.token)
+	}
+
+	if c.accessKey != "" && c.secretKey != "" {
+		header := fmt.Sprintf("accessKey=%s; secretKey=%s;", c.accessKey, c.secretKey)
+		req.Header.Set("X-ApiKeys", header)
+	}
+
+	c.debugln("put(): Executing request")
 	resp, err := httpClient.Do(req)
 	if err != nil {
 		return 0, nil, err

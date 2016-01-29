@@ -24,3 +24,8 @@ type sessionInfoResponse struct {
 	Whatsnew        bool        `json:"whatsnew"`
 	WhatsnewVersion string      `json:"whatsnew_version"`
 }
+
+type newAPIKeys struct {
+	AccessKey string `json:"accessKey"`
+	SecretKey string `json:"secretKey"`
+}
