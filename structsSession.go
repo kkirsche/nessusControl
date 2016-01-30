@@ -1,15 +1,18 @@
 package nessus
 
-// The response from Nessus when CreateSession() is called.
-type createSessionResponse struct {
+// CreateSessionResponse is The response from Nessus when CreateSession() is called.
+type CreateSessionResponse struct {
 	Token string `json:"token"`
 }
 
-type errorResponse struct {
+// ErrorResponse is used whenever there is an error with completing a request
+// to Nessus
+type ErrorResponse struct {
 	Error string `json:"error"`
 }
 
-type sessionInfoResponse struct {
+// SessionInfoResponse represents the current user or key session
+type SessionInfoResponse struct {
 	Connectors      interface{} `json:"connectors"`
 	ContainerID     int         `json:"container_id"`
 	Email           string      `json:"email"`
@@ -25,7 +28,9 @@ type sessionInfoResponse struct {
 	WhatsnewVersion string      `json:"whatsnew_version"`
 }
 
-type newAPIKeys struct {
+// NewAPIKeys is the response to GenerateAPIKeys which includes the new API keys
+// to connect to the API.
+type NewAPIKeys struct {
 	AccessKey string `json:"accessKey"`
 	SecretKey string `json:"secretKey"`
 }

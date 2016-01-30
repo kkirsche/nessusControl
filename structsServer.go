@@ -1,6 +1,7 @@
 package nessus
 
-type serverPropertiesResponse struct {
+// ServerPropertiesResponse represents Nessus's response to ServerProperties
+type ServerPropertiesResponse struct {
 	Capabilities struct {
 		MultiScanner      bool   `json:"multi_scanner"`
 		MultiUser         string `json:"multi_user"`
@@ -35,7 +36,8 @@ type serverPropertiesResponse struct {
 	} `json:"update"`
 }
 
-type serverStatusResponse struct {
+// ServerStatusResponse is the current status of the Nessus server
+type ServerStatusResponse struct {
 	Code     int    `json:"code"`
 	Progress int    `json:"progress"`
 	Status   string `json:"status"`
