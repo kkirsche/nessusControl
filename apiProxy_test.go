@@ -42,3 +42,35 @@ func TestViewProxy(t *testing.T) {
 		t.FailNow()
 	}
 }
+
+func TestChangeProxy(t *testing.T) {
+	testServer := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintln(w, "")
+	}))
+	defer testServer.Close()
+
+	transport := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+
+	httpClient := &http.Client{Transport: transport}
+
+	port := strings.Split(testServer.URL, ":")[2]
+
+	client := &Client{
+		username: "testU",
+		password: "testP",
+		ip:       "127.0.0.1",
+		port:     port,
+	}
+
+	client, err := client.CreateSession(httpClient)
+	if err != nil {
+		t.FailNow()
+	}
+
+	proxySettings, err := client.ChangeProxy(httpClient, `{"user_agent":"nessus-v6"}`)
+	if err != nil || proxySettings != true {
+		t.FailNow()
+	}
+}
