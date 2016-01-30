@@ -9,7 +9,7 @@ import (
 // CreateSession creates a new session token for the given user/password within
 // Client. It requires an http.Client pointer to make the request to Nessus.
 func (c *Client) CreateSession(httpClient *http.Client) (*Client, error) {
-	c.debugln("CreateSession(): Building session URL")
+	c.debugln("CreateSession(): Building create session URL")
 	url := fmt.Sprintf("https://%s:%s/session", c.ip, c.port)
 	jsonStr := []byte(fmt.Sprintf(`{"username":"%s","password":"%s"}`, c.username, c.password))
 
@@ -84,7 +84,7 @@ func (c *Client) EditSession(httpClient *http.Client, updateJSON string) (sessio
 // GetSession returns the user session data.
 // It requires an http.Client pointer to make the request to Nessus.
 func (c *Client) GetSession(httpClient *http.Client) (sessionInfoResponse, error) {
-	c.debugln("GetSession(): Building edit session URL")
+	c.debugln("GetSession(): Building get session URL")
 	url := fmt.Sprintf("https://%s:%s/session", c.ip, c.port)
 
 	statusCode, body, err := c.get(httpClient, url)
