@@ -42,3 +42,37 @@ func TestServerProperties(t *testing.T) {
 		t.FailNow()
 	}
 }
+
+func TestServerStatus(t *testing.T) {
+	testServer := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		response := `{"code": 200,"progress": null,"status": "ready"}`
+		fmt.Fprintln(w, response)
+	}))
+	defer testServer.Close()
+
+	transport := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+
+	httpClient := &http.Client{Transport: transport}
+
+	port := strings.Split(testServer.URL, ":")[2]
+
+	client := &Client{
+		username: "testU",
+		password: "testP",
+		ip:       "127.0.0.1",
+		port:     port,
+	}
+
+	client, err := client.CreateSession(httpClient)
+	if err != nil {
+		t.FailNow()
+	}
+
+	status, err := client.ServerStatus(httpClient)
+	if err != nil || status.Status != "ready" {
+		t.FailNow()
+	}
+}

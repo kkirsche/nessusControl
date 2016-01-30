@@ -34,3 +34,9 @@ type serverPropertiesResponse struct {
 		Restart    bool   `json:"restart"`
 	} `json:"update"`
 }
+
+type serverStatusResponse struct {
+	Code     int    `json:"code"`
+	Progress int    `json:"progress"`
+	Status   string `json:"status"`
+}
