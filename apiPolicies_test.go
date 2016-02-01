@@ -9,6 +9,74 @@ import (
 	"testing"
 )
 
+func TestCopyPolicy(t *testing.T) {
+	testServer := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		response := `{"name":"Copy of Test Policy","id":29}`
+		fmt.Fprintln(w, response)
+	}))
+	defer testServer.Close()
+
+	transport := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+
+	httpClient := &http.Client{Transport: transport}
+
+	port := strings.Split(testServer.URL, ":")[2]
+
+	client := &Client{
+		username: "testU",
+		password: "testP",
+		ip:       "127.0.0.1",
+		port:     port,
+	}
+
+	client, err := client.CreateSession(httpClient)
+	if err != nil {
+		t.FailNow()
+	}
+
+	copiedPolicy, err := client.CopyPolicy(httpClient, 26)
+	if err != nil || copiedPolicy.Name != "Copy of Test Policy" {
+		t.FailNow()
+	}
+}
+
+func TestCreatePolicy(t *testing.T) {
+	testServer := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		response := `{"policy_id": 25,"policy_name": "Example"}`
+		fmt.Fprintln(w, response)
+	}))
+	defer testServer.Close()
+
+	transport := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+
+	httpClient := &http.Client{Transport: transport}
+
+	port := strings.Split(testServer.URL, ":")[2]
+
+	client := &Client{
+		username: "testU",
+		password: "testP",
+		ip:       "127.0.0.1",
+		port:     port,
+	}
+
+	client, err := client.CreateSession(httpClient)
+	if err != nil {
+		t.FailNow()
+	}
+
+	createdPolicy, err := client.CreatePolicy(httpClient, `{"uuid": "9C3D4239-354A-438C-92C2-67AD32C24C0B"}`)
+	if err != nil || createdPolicy.PolicyID != 25 {
+		t.FailNow()
+	}
+}
+
 func TestDeletePolicy(t *testing.T) {
 	testServer := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -39,7 +107,6 @@ func TestDeletePolicy(t *testing.T) {
 
 	deleted, err := client.DeletePolicy(httpClient, 25)
 	if err != nil || deleted != true {
-		fmt.Println(err)
 		t.FailNow()
 	}
 }

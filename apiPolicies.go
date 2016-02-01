@@ -6,6 +6,73 @@ import (
 	"net/http"
 )
 
+// CopyPolicy copies a policy.
+// It requires an http.Client pointer to make the request to Nessus.
+func (c *Client) CopyPolicy(httpClient *http.Client, policyID int) (CopyPolicyResponse, error) {
+	c.debugln("CopyPolicy(): Building policy URL")
+	url := fmt.Sprintf("https://%s:%s/policies/%d/copy", c.ip, c.port, policyID)
+
+	statusCode, body, err := c.postWithJSON(httpClient, url, nil)
+	if err != nil {
+		return CopyPolicyResponse{}, err
+	}
+
+	switch statusCode {
+	case 200:
+		var policy CopyPolicyResponse
+		err = json.Unmarshal(body, &policy)
+		if err != nil {
+			return CopyPolicyResponse{}, err
+		}
+		c.debugln("CopyPolicy(): Successfully copied the policy.")
+		return policy, nil
+	default:
+		var err ErrorResponse
+		unmarshalError := json.Unmarshal(body, &err)
+		if unmarshalError != nil {
+			return CopyPolicyResponse{}, unmarshalError
+		}
+		c.debugln("CopyPolicy(): Policy could not be copied.")
+		return CopyPolicyResponse{}, fmt.Errorf("%s", err.Error)
+	}
+}
+
+// CreatePolicy creates a policy.
+// It requires an http.Client pointer to make the request to Nessus.
+func (c *Client) CreatePolicy(httpClient *http.Client, policyJSONString string) (CreatePolicyResponse, error) {
+	c.debugln("CreatePolicy(): Building create policy URL")
+	url := fmt.Sprintf("https://%s:%s/policies", c.ip, c.port)
+
+	policyJSON, err := json.Marshal(policyJSONString)
+	if err != nil {
+		return CreatePolicyResponse{}, err
+	}
+
+	statusCode, body, err := c.postWithJSON(httpClient, url, policyJSON)
+	if err != nil {
+		return CreatePolicyResponse{}, err
+	}
+
+	switch statusCode {
+	case 200:
+		var policy CreatePolicyResponse
+		err = json.Unmarshal(body, &policy)
+		if err != nil {
+			return CreatePolicyResponse{}, err
+		}
+		c.debugln("CreatePolicy(): Successfully created policy.")
+		return policy, nil
+	default:
+		var err ErrorResponse
+		unmarshalError := json.Unmarshal(body, &err)
+		if unmarshalError != nil {
+			return CreatePolicyResponse{}, unmarshalError
+		}
+		c.debugln("CreatePolicy(): Policy could not be created.")
+		return CreatePolicyResponse{}, fmt.Errorf("%s", err.Error)
+	}
+}
+
 // DeletePolicy deletes a policy.
 // It requires an http.Client pointer to make the request to Nessus.
 func (c *Client) DeletePolicy(httpClient *http.Client, policyID int) (bool, error) {

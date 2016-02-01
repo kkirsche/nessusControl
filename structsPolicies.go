@@ -27,3 +27,15 @@ type PolicyDetailsResponse struct {
 	Settings interface{} `json:"settings"`
 	UUID     string      `json:"uuid"`
 }
+
+// CreatePolicyResponse is the response to a successful creation of a new policy
+type CreatePolicyResponse struct {
+	PolicyID   int    `json:"policy_id"`
+	PolicyName string `json:"policy_name"`
+}
+
+// CopyPolicyResponse is the response when copying a policy
+type CopyPolicyResponse struct {
+	ID   int    `json:"id"`
+	Name string `json:"name"`
+}
