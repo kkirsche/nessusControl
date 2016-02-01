@@ -71,7 +71,7 @@ func TestCreatePolicy(t *testing.T) {
 		t.FailNow()
 	}
 
-	createdPolicy, err := client.CreatePolicy(httpClient, `{"uuid": "9C3D4239-354A-438C-92C2-67AD32C24C0B"}`)
+	createdPolicy, err := client.CreatePolicy(httpClient, `{"settings": {"name":"Example Policy"},"uuid": "ad629e16-03b6-8c1d-cef6-ef8c9dd3c658d24bd260ef5f9e66"}`)
 	if err != nil || createdPolicy.PolicyID != 25 {
 		t.FailNow()
 	}

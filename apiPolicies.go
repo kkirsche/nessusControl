@@ -39,16 +39,11 @@ func (c *Client) CopyPolicy(httpClient *http.Client, policyID int) (CopyPolicyRe
 
 // CreatePolicy creates a policy.
 // It requires an http.Client pointer to make the request to Nessus.
-func (c *Client) CreatePolicy(httpClient *http.Client, policyJSONString string) (CreatePolicyResponse, error) {
+func (c *Client) CreatePolicy(httpClient *http.Client, policyJSON string) (CreatePolicyResponse, error) {
 	c.debugln("CreatePolicy(): Building create policy URL")
 	url := fmt.Sprintf("https://%s:%s/policies", c.ip, c.port)
 
-	policyJSON, err := json.Marshal(policyJSONString)
-	if err != nil {
-		return CreatePolicyResponse{}, err
-	}
-
-	statusCode, body, err := c.postWithJSON(httpClient, url, policyJSON)
+	statusCode, body, err := c.postWithJSON(httpClient, url, []byte(policyJSON))
 	if err != nil {
 		return CreatePolicyResponse{}, err
 	}
