@@ -6,6 +6,32 @@ import (
 	"net/http"
 )
 
+// CreatePluginRule creates a new plugin rule for the current user.
+// It requires an http.Client pointer to make the request to Nessus.
+func (c *Client) CreatePluginRule(httpClient *http.Client, pluginRuleJSON string) (bool, error) {
+	c.debugln("CreatePluginRule(): Building create plugin rule URL")
+	url := fmt.Sprintf("https://%s:%s/plugin-rules", c.ip, c.port)
+
+	statusCode, body, err := c.postWithJSON(httpClient, url, []byte(pluginRuleJSON))
+	if err != nil {
+		return false, err
+	}
+
+	switch statusCode {
+	case 200:
+		c.debugln("CreatePluginRule(): Successfully created plugin rule.")
+		return true, nil
+	default:
+		var err ErrorResponse
+		unmarshalError := json.Unmarshal(body, &err)
+		if unmarshalError != nil {
+			return false, unmarshalError
+		}
+		c.debugln("CreatePluginRule(): Plugin rule could not be created.")
+		return false, fmt.Errorf("%s", err.Error)
+	}
+}
+
 // DeletePluginRule deletes a plugin rule.
 // It requires an http.Client pointer to make the request to Nessus.
 func (c *Client) DeletePluginRule(httpClient *http.Client, ruleID int) (bool, error) {
