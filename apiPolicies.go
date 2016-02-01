@@ -6,10 +6,36 @@ import (
 	"net/http"
 )
 
+// ConfigurePolicy changes the parameters of a policy.
+// It requires an http.Client pointer to make the request to Nessus.
+func (c *Client) ConfigurePolicy(httpClient *http.Client, policyID int, configurationJSON string) (bool, error) {
+	c.debugln("ConfigurePolicy(): Building policy configuration URL")
+	url := fmt.Sprintf("https://%s:%s/policies/%d", c.ip, c.port, policyID)
+
+	statusCode, body, err := c.putWithJSON(httpClient, url, []byte(configurationJSON))
+	if err != nil {
+		return false, err
+	}
+
+	switch statusCode {
+	case 200:
+		c.debugln("ConfigurePolicy(): Successfully configured the policy.")
+		return true, nil
+	default:
+		var err ErrorResponse
+		unmarshalError := json.Unmarshal(body, &err)
+		if unmarshalError != nil {
+			return false, unmarshalError
+		}
+		c.debugln("ConfigurePolicy(): Policy could not be configured.")
+		return false, fmt.Errorf("%s", err.Error)
+	}
+}
+
 // CopyPolicy copies a policy.
 // It requires an http.Client pointer to make the request to Nessus.
 func (c *Client) CopyPolicy(httpClient *http.Client, policyID int) (CopyPolicyResponse, error) {
-	c.debugln("CopyPolicy(): Building policy URL")
+	c.debugln("CopyPolicy(): Building copy policy URL")
 	url := fmt.Sprintf("https://%s:%s/policies/%d/copy", c.ip, c.port, policyID)
 
 	statusCode, body, err := c.postWithJSON(httpClient, url, nil)

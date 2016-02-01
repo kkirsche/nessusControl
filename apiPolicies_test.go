@@ -9,6 +9,40 @@ import (
 	"testing"
 )
 
+func TestConfigurePolicy(t *testing.T) {
+	testServer := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		response := `{"name":"Copy of Test Policy","id":29}`
+		fmt.Fprintln(w, response)
+	}))
+	defer testServer.Close()
+
+	transport := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+
+	httpClient := &http.Client{Transport: transport}
+
+	port := strings.Split(testServer.URL, ":")[2]
+
+	client := &Client{
+		username: "testU",
+		password: "testP",
+		ip:       "127.0.0.1",
+		port:     port,
+	}
+
+	client, err := client.CreateSession(httpClient)
+	if err != nil {
+		t.FailNow()
+	}
+
+	configuredPolicy, err := client.ConfigurePolicy(httpClient, 33, `{"uuid":"ad629e16-03b6-8c1d-cef6-ef8c9dd3c658d24bd260ef5f9e66","settings": {"acls": []}}`)
+	if err != nil || configuredPolicy != true {
+		t.FailNow()
+	}
+}
+
 func TestCopyPolicy(t *testing.T) {
 	testServer := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
