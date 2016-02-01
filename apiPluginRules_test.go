@@ -9,6 +9,74 @@ import (
 	"testing"
 )
 
+func TestDeletePluginRule(t *testing.T) {
+	testServer := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		response := `{"token": "example"}` // This method would return nothing, this is for create session
+		fmt.Fprintln(w, response)
+	}))
+	defer testServer.Close()
+
+	transport := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+
+	httpClient := &http.Client{Transport: transport}
+
+	port := strings.Split(testServer.URL, ":")[2]
+
+	client := &Client{
+		username: "testU",
+		password: "testP",
+		ip:       "127.0.0.1",
+		port:     port,
+	}
+
+	client, err := client.CreateSession(httpClient)
+	if err != nil {
+		t.FailNow()
+	}
+
+	deletedPlugin, err := client.DeletePluginRule(httpClient, 1)
+	if err != nil || deletedPlugin != true {
+		t.FailNow()
+	}
+}
+
+func TestEditPluginRule(t *testing.T) {
+	testServer := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		response := `{"token": "example"}` // This method would return nothing, this is for create session
+		fmt.Fprintln(w, response)
+	}))
+	defer testServer.Close()
+
+	transport := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+
+	httpClient := &http.Client{Transport: transport}
+
+	port := strings.Split(testServer.URL, ":")[2]
+
+	client := &Client{
+		username: "testU",
+		password: "testP",
+		ip:       "127.0.0.1",
+		port:     port,
+	}
+
+	client, err := client.CreateSession(httpClient)
+	if err != nil {
+		t.FailNow()
+	}
+
+	successfullyEdited, err := client.EditPluginRule(httpClient, 1, `{"plugin_id": 12345, "type":"recast_critical", "host":"ExampleHost"}`)
+	if err != nil || successfullyEdited != true {
+		t.FailNow()
+	}
+}
+
 func TestPluginRulesList(t *testing.T) {
 	testServer := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")

@@ -6,6 +6,58 @@ import (
 	"net/http"
 )
 
+// DeletePluginRule deletes a plugin rule.
+// It requires an http.Client pointer to make the request to Nessus.
+func (c *Client) DeletePluginRule(httpClient *http.Client, ruleID int) (bool, error) {
+	c.debugln("DeletePluginRule(): Building delete plugin rule URL")
+	url := fmt.Sprintf("https://%s:%s/plugin-rules/%d", c.ip, c.port, ruleID)
+
+	statusCode, body, err := c.delete(httpClient, url)
+	if err != nil {
+		return false, err
+	}
+
+	switch statusCode {
+	case 200:
+		c.debugln("DeletePluginRule(): Successfully deleted plugin rule.")
+		return true, nil
+	default:
+		var err ErrorResponse
+		unmarshalError := json.Unmarshal(body, &err)
+		if unmarshalError != nil {
+			return false, unmarshalError
+		}
+		c.debugln("DeletePluginRule(): Plugin rule could not be deleted.")
+		return false, fmt.Errorf("%s", err.Error)
+	}
+}
+
+// EditPluginRule modifies a plugin rule for the current user.
+// It requires an http.Client pointer to make the request to Nessus.
+func (c *Client) EditPluginRule(httpClient *http.Client, ruleID int, editJSON string) (bool, error) {
+	c.debugln("EditPluginRule(): Building edit plugin rule URL")
+	url := fmt.Sprintf("https://%s:%s/plugin-rules/%d", c.ip, c.port, ruleID)
+
+	statusCode, body, err := c.putWithJSON(httpClient, url, []byte(editJSON))
+	if err != nil {
+		return false, err
+	}
+
+	switch statusCode {
+	case 200:
+		c.debugln("EditPluginRule(): Successfully edited plugin rule.")
+		return true, nil
+	default:
+		var err ErrorResponse
+		unmarshalError := json.Unmarshal(body, &err)
+		if unmarshalError != nil {
+			return false, unmarshalError
+		}
+		c.debugln("EditPluginRule(): Plugin rule could not be edited.")
+		return false, fmt.Errorf("%s", err.Error)
+	}
+}
+
 // PluginRulesList returns the current user plugin rules.
 // It requires an http.Client pointer to make the request to Nessus.
 func (c *Client) PluginRulesList(httpClient *http.Client) (PluginRulesList, error) {
