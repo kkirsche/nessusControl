@@ -28,3 +28,14 @@ type Scan struct {
 	UserPermissions      int    `json:"user_permissions"`
 	UUID                 string `json:"uuid"`
 }
+
+// ScanTimezones is a list of scan timezone objects
+type ScanTimezones struct {
+	Timezones []ScanTimezone `json:"timezones"`
+}
+
+// ScanTimezone is used to ensure scans run at the proper local time.
+type ScanTimezone struct {
+	Name  string `json:"name"`
+	Value string `json:"value"`
+}

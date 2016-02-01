@@ -76,3 +76,37 @@ func TestPauseScan(t *testing.T) {
 		t.FailNow()
 	}
 }
+
+func TestListScanTimezones(t *testing.T) {
+	testServer := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		response := `{"timezones":[{"name":"Africa/Abidjan","value":"Africa/Abidjan"},{"name":"Africa/Accra","value":"Africa/Accra"}]}`
+		fmt.Fprintln(w, response)
+	}))
+	defer testServer.Close()
+
+	transport := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+
+	httpClient := &http.Client{Transport: transport}
+
+	port := strings.Split(testServer.URL, ":")[2]
+
+	client := &Client{
+		username: "testU",
+		password: "testP",
+		ip:       "127.0.0.1",
+		port:     port,
+	}
+
+	client, err := client.CreateSession(httpClient)
+	if err != nil {
+		t.FailNow()
+	}
+
+	scanTimezones, err := client.ListScanTimezones(httpClient)
+	if err != nil || scanTimezones.Timezones[0].Name != "Africa/Abidjan" {
+		t.FailNow()
+	}
+}
