@@ -73,7 +73,6 @@ func TestListPermissions(t *testing.T) {
 
 	permissions, err := client.ListPermissions(httpClient, "policy", 37)
 	if err != nil || permissions.Acls[1].Permissions != 128 {
-		fmt.Println(err)
 		t.FailNow()
 	}
 }

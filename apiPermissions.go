@@ -11,7 +11,7 @@ import (
 // "connector".
 // It requires an http.Client pointer to make the request to Nessus.
 func (c *Client) ChangePermissions(httpClient *http.Client, objectType string, objectID int, updatedPermissions string) (bool, error) {
-	c.debugln("ListPermissions(): Building list permissions URL")
+	c.debugln("ChangePermissions(): Building change permissions URL")
 	url := fmt.Sprintf("https://%s:%s/permissions/%s/%d", c.ip, c.port, objectType, objectID)
 
 	statusCode, body, err := c.putWithJSON(httpClient, url, []byte(updatedPermissions))
@@ -21,7 +21,7 @@ func (c *Client) ChangePermissions(httpClient *http.Client, objectType string, o
 
 	switch statusCode {
 	case 200:
-		c.debugln("ListPermissions(): Successfully retrieved object's permissions.")
+		c.debugln("ChangePermissions(): Successfully changed object's permissions.")
 		return true, nil
 	default:
 		var err ErrorResponse
@@ -29,7 +29,7 @@ func (c *Client) ChangePermissions(httpClient *http.Client, objectType string, o
 		if unmarshalError != nil {
 			return false, unmarshalError
 		}
-		c.debugln("ListPermissions(): Object's permissions could not be retrieved.")
+		c.debugln("ChangePermissions(): Object's permissions could not be changed.")
 		return false, fmt.Errorf("%s", err.Error)
 	}
 }
