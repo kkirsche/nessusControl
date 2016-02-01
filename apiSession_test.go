@@ -78,7 +78,7 @@ func TestEditSession(t *testing.T) {
 
 func TestDeleteSession(t *testing.T) {
 	testServer := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintln(w, "")
+		fmt.Fprintln(w, `{"token": "TestToken"}`) // Return JSON for create session.
 	}))
 	defer testServer.Close()
 
@@ -143,7 +143,7 @@ func TestGetSession(t *testing.T) {
 
 func TestChangePassword(t *testing.T) {
 	testServer := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintln(w, "")
+		fmt.Fprintln(w, `{"token": "TestToken"}`) // Return JSON for CreateSession
 	}))
 	defer testServer.Close()
 

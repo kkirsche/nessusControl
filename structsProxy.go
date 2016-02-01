@@ -4,7 +4,7 @@ package nessus
 type ViewProxyResponse struct {
 	Proxy         string `json:"proxy"`
 	ProxyPassword string `json:"proxy_password"`
-	ProxyPort     int    `json:"proxy_port"`
+	ProxyPort     string `json:"proxy_port"`
 	ProxyUsername string `json:"proxy_username"`
 	UserAgent     string `json:"user_agent"`
 }

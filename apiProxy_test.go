@@ -45,7 +45,7 @@ func TestViewProxy(t *testing.T) {
 
 func TestChangeProxy(t *testing.T) {
 	testServer := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintln(w, "")
+		fmt.Fprintln(w, `{"token": "TestToken"}`) // Return JSON for CreateSession
 	}))
 	defer testServer.Close()
 

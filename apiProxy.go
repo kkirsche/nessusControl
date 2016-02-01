@@ -22,6 +22,7 @@ func (c *Client) ViewProxy(httpClient *http.Client) (ViewProxyResponse, error) {
 		var proxySettings ViewProxyResponse
 		err = json.Unmarshal(body, &proxySettings)
 		if err != nil {
+			fmt.Println(err)
 			return ViewProxyResponse{}, err
 		}
 		c.debugln("ViewProxy(): Successfully retrieved proxy settings.")
