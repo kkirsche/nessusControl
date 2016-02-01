@@ -64,21 +64,21 @@ func (c *Client) DestroySession(httpClient *http.Client) (bool, error) {
 
 // EditSession changes settings for the current user.
 // It requires an http.Client pointer to make the request to Nessus.
-func (c *Client) EditSession(httpClient *http.Client, updateJSON string) (SessionInfoResponse, error) {
+func (c *Client) EditSession(httpClient *http.Client, updateJSON string) (SessionInfo, error) {
 	c.debugln("EditSession(): Building edit session URL")
 	url := fmt.Sprintf("https://%s:%s/session", c.ip, c.port)
 
 	statusCode, body, err := c.putWithJSON(httpClient, url, []byte(updateJSON))
 	if err != nil {
-		return SessionInfoResponse{}, err
+		return SessionInfo{}, err
 	}
 
 	switch statusCode {
 	case 200:
-		var session SessionInfoResponse
+		var session SessionInfo
 		err := json.Unmarshal(body, &session)
 		if err != nil {
-			return SessionInfoResponse{}, err
+			return SessionInfo{}, err
 		}
 		c.debugln("EditSession(): Successfully update session.")
 		return session, nil
@@ -86,30 +86,30 @@ func (c *Client) EditSession(httpClient *http.Client, updateJSON string) (Sessio
 		var err ErrorResponse
 		unmarErr := json.Unmarshal(body, &err)
 		if unmarErr != nil {
-			return SessionInfoResponse{}, unmarErr
+			return SessionInfo{}, unmarErr
 		}
 		c.debugln("EditSession(): Session could not be created.")
-		return SessionInfoResponse{}, fmt.Errorf("%s", err.Error)
+		return SessionInfo{}, fmt.Errorf("%s", err.Error)
 	}
 }
 
 // GetSession returns the user session data.
 // It requires an http.Client pointer to make the request to Nessus.
-func (c *Client) GetSession(httpClient *http.Client) (SessionInfoResponse, error) {
+func (c *Client) GetSession(httpClient *http.Client) (SessionInfo, error) {
 	c.debugln("GetSession(): Building get session URL")
 	url := fmt.Sprintf("https://%s:%s/session", c.ip, c.port)
 
 	statusCode, body, err := c.get(httpClient, url)
 	if err != nil {
-		return SessionInfoResponse{}, err
+		return SessionInfo{}, err
 	}
 
 	switch statusCode {
 	case 200:
-		var session SessionInfoResponse
+		var session SessionInfo
 		err := json.Unmarshal(body, &session)
 		if err != nil {
-			return SessionInfoResponse{}, err
+			return SessionInfo{}, err
 		}
 		c.debugln("GetSession(): Successfully retrieved session.")
 		return session, nil
@@ -117,10 +117,10 @@ func (c *Client) GetSession(httpClient *http.Client) (SessionInfoResponse, error
 		var err ErrorResponse
 		unmarErr := json.Unmarshal(body, &err)
 		if unmarErr != nil {
-			return SessionInfoResponse{}, unmarErr
+			return SessionInfo{}, unmarErr
 		}
 		c.debugln("EditSession(): Session could not be retrieved.")
-		return SessionInfoResponse{}, fmt.Errorf("%s", err.Error)
+		return SessionInfo{}, fmt.Errorf("%s", err.Error)
 	}
 }
 

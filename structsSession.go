@@ -5,14 +5,8 @@ type CreateSessionResponse struct {
 	Token string `json:"token"`
 }
 
-// ErrorResponse is used whenever there is an error with completing a request
-// to Nessus
-type ErrorResponse struct {
-	Error string `json:"error"`
-}
-
-// SessionInfoResponse represents the current user or key session
-type SessionInfoResponse struct {
+// SessionInfo represents the current user's session information
+type SessionInfo struct {
 	Connectors      interface{} `json:"connectors"`
 	ContainerID     int         `json:"container_id"`
 	Email           string      `json:"email"`
