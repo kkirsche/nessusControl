@@ -63,6 +63,39 @@ func (c *Client) PauseScan(httpClient *http.Client, scanID int) (bool, error) {
 	}
 }
 
+// ToggleScheduledScan enables or disables a scan schedule.
+// It requires an http.Client pointer to make the request to Nessus.
+func (c *Client) ToggleScheduledScan(httpClient *http.Client, scanID int, enabled bool) (ToggleScheduledScan, error) {
+	c.debugln("StopScan(): Building stop scan URL")
+	url := fmt.Sprintf("https://%s:%s/scans/%d/schedule", c.ip, c.port, scanID)
+
+	toggleJSON := fmt.Sprintf(`{"enabled": %t}`, enabled)
+
+	statusCode, body, err := c.postWithJSON(httpClient, url, []byte(toggleJSON))
+	if err != nil {
+		return ToggleScheduledScan{}, err
+	}
+
+	switch statusCode {
+	case 200:
+		var toggledScan ToggleScheduledScan
+		err = json.Unmarshal(body, &toggledScan)
+		if err != nil {
+			return ToggleScheduledScan{}, err
+		}
+		c.debugln("StopScan(): Successfully stopped scan.")
+		return toggledScan, nil
+	default:
+		var err ErrorResponse
+		unmarshalError := json.Unmarshal(body, &err)
+		if unmarshalError != nil {
+			return ToggleScheduledScan{}, unmarshalError
+		}
+		c.debugln("StopScan(): Scan could not be stopped.")
+		return ToggleScheduledScan{}, fmt.Errorf("%s", err.Error)
+	}
+}
+
 // StopScan stops a scan.
 // It requires an http.Client pointer to make the request to Nessus.
 func (c *Client) StopScan(httpClient *http.Client, scanID int) (bool, error) {

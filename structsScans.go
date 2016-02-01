@@ -29,6 +29,16 @@ type Scan struct {
 	UUID                 string `json:"uuid"`
 }
 
+// ToggleScheduledScan represents the response to a scheduled scan which has been
+// enabled or disabled.
+type ToggleScheduledScan struct {
+	Control   bool   `json:"control"`
+	Enabled   bool   `json:"enabled"`
+	Rrules    string `json:"rrules"`
+	Starttime string `json:"starttime"`
+	Timezone  string `json:"timezone"`
+}
+
 // ScanTimezones is a list of scan timezone objects
 type ScanTimezones struct {
 	Timezones []ScanTimezone `json:"timezones"`
