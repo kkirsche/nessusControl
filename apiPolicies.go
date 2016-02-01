@@ -6,10 +6,47 @@ import (
 	"net/http"
 )
 
+// ImportPolicy imports an existing policy uploaded using Nessus.file
+// (.nessus format only).
+// It requires an http.Client pointer to make the request to Nessus.
+func (c *Client) ImportPolicy(httpClient *http.Client, file string) (PolicyResponse, error) {
+	c.debugln("ImportPolicy(): Building import policy URL")
+	url := fmt.Sprintf("https://%s:%s/policies/import", c.ip, c.port)
+	fileString := fmt.Sprintf(`{"file":"%s"}`, file)
+	fileJSON, err := json.Marshal(fileString)
+	if err != nil {
+		return PolicyResponse{}, err
+	}
+
+	statusCode, body, err := c.postWithJSON(httpClient, url, fileJSON)
+	if err != nil {
+		return PolicyResponse{}, err
+	}
+
+	switch statusCode {
+	case 200:
+		var policy PolicyResponse
+		err = json.Unmarshal(body, &policy)
+		if err != nil {
+			return PolicyResponse{}, err
+		}
+		c.debugln("ImportPolicy(): Successfully imported policy file.")
+		return policy, nil
+	default:
+		var err ErrorResponse
+		unmarshalError := json.Unmarshal(body, &err)
+		if unmarshalError != nil {
+			return PolicyResponse{}, unmarshalError
+		}
+		c.debugln("ImportPolicy(): Policy file could not be imported.")
+		return PolicyResponse{}, fmt.Errorf("%s", err.Error)
+	}
+}
+
 // ExportPolicy exports the given policy in nessus (XML) format.
 // It requires an http.Client pointer to make the request to Nessus.
 func (c *Client) ExportPolicy(httpClient *http.Client, policyID int) (string, error) {
-	c.debugln("ListPolicy(): Building list policies URL")
+	c.debugln("ExportPolicy(): Building export policy URL")
 	url := fmt.Sprintf("https://%s:%s/policies/%d/export", c.ip, c.port, policyID)
 
 	statusCode, body, err := c.get(httpClient, url)
@@ -19,7 +56,7 @@ func (c *Client) ExportPolicy(httpClient *http.Client, policyID int) (string, er
 
 	switch statusCode {
 	case 200:
-		c.debugln("ListPolicy(): Successfully retrieved policy list.")
+		c.debugln("ListPolicy(): Successfully exported policy.")
 		return string(body), nil
 	default:
 		var err ErrorResponse
@@ -27,7 +64,7 @@ func (c *Client) ExportPolicy(httpClient *http.Client, policyID int) (string, er
 		if unmarshalError != nil {
 			return "", unmarshalError
 		}
-		c.debugln("ListPolicy(): Policy list could not be retrieved.")
+		c.debugln("ExportPolicy(): Policy could not be exported.")
 		return "", fmt.Errorf("%s", err.Error)
 	}
 }
@@ -48,7 +85,6 @@ func (c *Client) ListPolicy(httpClient *http.Client) (ListPolicyResponse, error)
 		var policies ListPolicyResponse
 		err = json.Unmarshal(body, &policies)
 		if err != nil {
-			fmt.Println(err.Error())
 			return ListPolicyResponse{}, err
 		}
 		c.debugln("ListPolicy(): Successfully retrieved policy list.")
