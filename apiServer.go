@@ -20,12 +20,18 @@ func (c *Client) ServerProperties(httpClient *http.Client) (ServerPropertiesResp
 	switch statusCode {
 	case 200:
 		var properties ServerPropertiesResponse
-		json.Unmarshal(body, &properties)
+		err := json.Unmarshal(body, &properties)
+		if err != nil {
+			return ServerPropertiesResponse{}, err
+		}
 		c.debugln("ServerProperties(): Successfully retrieved server properties.")
 		return properties, nil
 	default:
 		var err ErrorResponse
-		json.Unmarshal(body, &err)
+		unmarErr := json.Unmarshal(body, &err)
+		if unmarErr != nil {
+			return ServerPropertiesResponse{}, unmarErr
+		}
 		c.debugln("ServerProperties(): Server properties could not be retrieved.")
 		return ServerPropertiesResponse{}, fmt.Errorf("%s", err.Error)
 	}
@@ -45,12 +51,18 @@ func (c *Client) ServerStatus(httpClient *http.Client) (ServerStatusResponse, er
 	switch statusCode {
 	case 200:
 		var status ServerStatusResponse
-		json.Unmarshal(body, &status)
+		err := json.Unmarshal(body, &status)
+		if err != nil {
+			return ServerStatusResponse{}, err
+		}
 		c.debugln("ServerStatus(): Successfully retrieved server status.")
 		return status, nil
 	default:
 		var err ErrorResponse
-		json.Unmarshal(body, &err)
+		unmarErr := json.Unmarshal(body, &err)
+		if unmarErr != nil {
+			return ServerStatusResponse{}, unmarErr
+		}
 		c.debugln("ServerStatus(): Server status could not be retrieved.")
 		return ServerStatusResponse{}, fmt.Errorf("%s", err.Error)
 	}

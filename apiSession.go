@@ -21,13 +21,19 @@ func (c *Client) CreateSession(httpClient *http.Client) (*Client, error) {
 	switch statusCode {
 	case 200:
 		var session CreateSessionResponse
-		json.Unmarshal(body, &session)
+		err := json.Unmarshal(body, &session)
+		if err != nil {
+			return nil, err
+		}
 		c.debugln("CreateSession(): Received token " + session.Token)
 		c.token = session.Token
 		return c, nil
 	default:
 		var err ErrorResponse
-		json.Unmarshal(body, &err)
+		unmarErr := json.Unmarshal(body, &err)
+		if unmarErr != nil {
+			return nil, unmarErr
+		}
 		c.debugln("CreateSession(): Session could not be created.")
 		return nil, fmt.Errorf("%s", err.Error)
 	}
@@ -70,12 +76,18 @@ func (c *Client) EditSession(httpClient *http.Client, updateJSON string) (Sessio
 	switch statusCode {
 	case 200:
 		var session SessionInfoResponse
-		json.Unmarshal(body, &session)
+		err := json.Unmarshal(body, &session)
+		if err != nil {
+			return SessionInfoResponse{}, err
+		}
 		c.debugln("EditSession(): Successfully update session.")
 		return session, nil
 	default:
 		var err ErrorResponse
-		json.Unmarshal(body, &err)
+		unmarErr := json.Unmarshal(body, &err)
+		if unmarErr != nil {
+			return SessionInfoResponse{}, unmarErr
+		}
 		c.debugln("EditSession(): Session could not be created.")
 		return SessionInfoResponse{}, fmt.Errorf("%s", err.Error)
 	}
@@ -95,12 +107,18 @@ func (c *Client) GetSession(httpClient *http.Client) (SessionInfoResponse, error
 	switch statusCode {
 	case 200:
 		var session SessionInfoResponse
-		json.Unmarshal(body, &session)
+		err := json.Unmarshal(body, &session)
+		if err != nil {
+			return SessionInfoResponse{}, err
+		}
 		c.debugln("GetSession(): Successfully retrieved session.")
 		return session, nil
 	default:
 		var err ErrorResponse
-		json.Unmarshal(body, &err)
+		unmarErr := json.Unmarshal(body, &err)
+		if unmarErr != nil {
+			return SessionInfoResponse{}, unmarErr
+		}
 		c.debugln("EditSession(): Session could not be retrieved.")
 		return SessionInfoResponse{}, fmt.Errorf("%s", err.Error)
 	}
@@ -125,7 +143,10 @@ func (c *Client) ChangePassword(httpClient *http.Client, newPassword string) (bo
 		return true, nil
 	default:
 		var err ErrorResponse
-		json.Unmarshal(body, &err)
+		unmarErr := json.Unmarshal(body, &err)
+		if unmarErr != nil {
+			return false, unmarErr
+		}
 		c.debugln("ChangePassword(): Password could not be changed.")
 		return false, fmt.Errorf("%s", err.Error)
 	}
@@ -145,12 +166,18 @@ func (c *Client) GenerateAPIKeys(httpClient *http.Client) (NewAPIKeys, error) {
 	switch statusCode {
 	case 200:
 		var apiKeys NewAPIKeys
-		json.Unmarshal(body, &apiKeys)
+		err := json.Unmarshal(body, &apiKeys)
+		if err != nil {
+			return NewAPIKeys{}, err
+		}
 		c.debugln("ChangePassword(): Successfully generated API keys.")
 		return apiKeys, nil
 	default:
 		var err ErrorResponse
-		json.Unmarshal(body, &err)
+		unmarErr := json.Unmarshal(body, &err)
+		if unmarErr != nil {
+			return NewAPIKeys{}, unmarErr
+		}
 		c.debugln("ChangePassword(): API Keys could not be generated.")
 		return NewAPIKeys{}, fmt.Errorf("%s", err.Error)
 	}

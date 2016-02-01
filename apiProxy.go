@@ -20,12 +20,18 @@ func (c *Client) ViewProxy(httpClient *http.Client) (ViewProxyResponse, error) {
 	switch statusCode {
 	case 200:
 		var proxySettings ViewProxyResponse
-		json.Unmarshal(body, &proxySettings)
+		err = json.Unmarshal(body, &proxySettings)
+		if err != nil {
+			return ViewProxyResponse{}, err
+		}
 		c.debugln("ViewProxy(): Successfully retrieved proxy settings.")
 		return proxySettings, nil
 	default:
 		var err ErrorResponse
-		json.Unmarshal(body, &err)
+		unmarshalError := json.Unmarshal(body, &err)
+		if unmarshalError != nil {
+			return ViewProxyResponse{}, unmarshalError
+		}
 		c.debugln("ViewProxy(): Proxy settings could not be retrieved.")
 		return ViewProxyResponse{}, fmt.Errorf("%s", err.Error)
 	}
@@ -55,7 +61,10 @@ func (c *Client) ChangeProxy(httpClient *http.Client, changeJSON string) (bool, 
 		return true, nil
 	default:
 		var err ErrorResponse
-		json.Unmarshal(body, &err)
+		unmarshalError := json.Unmarshal(body, &err)
+		if unmarshalError != nil {
+			return false, unmarshalError
+		}
 		c.debugln("ChangeProxy(): Proxy settings could not be changed.")
 		return false, fmt.Errorf("%s", err.Error)
 	}

@@ -20,12 +20,18 @@ func (c *Client) ListScanners(httpClient *http.Client) (ListScannersResponse, er
 	switch statusCode {
 	case 200:
 		var scanners ListScannersResponse
-		json.Unmarshal(body, &scanners)
+		err := json.Unmarshal(body, &scanners)
+		if err != nil {
+			return ListScannersResponse{}, err
+		}
 		c.debugln("ListScanners(): Successfully retrieved list of scanners.")
 		return scanners, nil
 	default:
 		var err ErrorResponse
-		json.Unmarshal(body, &err)
+		unmarErr := json.Unmarshal(body, &err)
+		if unmarErr != nil {
+			return ListScannersResponse{}, unmarErr
+		}
 		c.debugln("ListScanners(): Scanners list could not be retrieved.")
 		return ListScannersResponse{}, fmt.Errorf("%s", err.Error)
 	}
