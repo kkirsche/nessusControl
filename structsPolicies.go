@@ -21,7 +21,8 @@ type PolicyResponse struct {
 	Visibility           string `json:"visibility"`
 }
 
-type PolicyDetails struct {
+// PolicyDetailsResponse represents the policy details object
+type PolicyDetailsResponse struct {
 	Plugins  interface{} `json:"plugins"`
 	Settings interface{} `json:"settings"`
 	UUID     string      `json:"uuid"`

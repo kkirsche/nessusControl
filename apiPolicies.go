@@ -6,34 +6,60 @@ import (
 	"net/http"
 )
 
-// PolicyDetails returns details for the given policy.
+// DeletePolicy deletes a policy.
 // It requires an http.Client pointer to make the request to Nessus.
-func (c *Client) PolicyDetails(httpClient *http.Client, policyID int) (PolicyDetails, error) {
-	c.debugln("ImportPolicy(): Building import policy URL")
+func (c *Client) DeletePolicy(httpClient *http.Client, policyID int) (bool, error) {
+	c.debugln("DeletePolicy(): Building delete policy URL")
 	url := fmt.Sprintf("https://%s:%s/policies/%d", c.ip, c.port, policyID)
 
-	statusCode, body, err := c.get(httpClient, url)
+	statusCode, body, err := c.delete(httpClient, url)
 	if err != nil {
-		return PolicyDetails{}, err
+		return false, err
 	}
 
 	switch statusCode {
 	case 200:
-		var policyDetails PolicyDetails
+		c.debugln("DeletePolicy(): Successfully deleted the policy.")
+		return true, nil
+	default:
+		var err ErrorResponse
+		unmarshalError := json.Unmarshal(body, &err)
+		if unmarshalError != nil {
+			return false, unmarshalError
+		}
+		c.debugln("DeletePolicy(): Policy could not be deleted.")
+		return false, fmt.Errorf("%s", err.Error)
+	}
+}
+
+// PolicyDetails returns details for the given policy.
+// It requires an http.Client pointer to make the request to Nessus.
+func (c *Client) PolicyDetails(httpClient *http.Client, policyID int) (PolicyDetailsResponse, error) {
+	c.debugln("PolicyDetails(): Building policy details URL")
+	url := fmt.Sprintf("https://%s:%s/policies/%d", c.ip, c.port, policyID)
+
+	statusCode, body, err := c.get(httpClient, url)
+	if err != nil {
+		return PolicyDetailsResponse{}, err
+	}
+
+	switch statusCode {
+	case 200:
+		var policyDetails PolicyDetailsResponse
 		err = json.Unmarshal(body, &policyDetails)
 		if err != nil {
-			return PolicyDetails{}, err
+			return PolicyDetailsResponse{}, err
 		}
-		c.debugln("ImportPolicy(): Successfully imported policy file.")
+		c.debugln("PolicyDetails(): Successfully retrieved policy details.")
 		return policyDetails, nil
 	default:
 		var err ErrorResponse
 		unmarshalError := json.Unmarshal(body, &err)
 		if unmarshalError != nil {
-			return PolicyDetails{}, unmarshalError
+			return PolicyDetailsResponse{}, unmarshalError
 		}
-		c.debugln("ImportPolicy(): Policy file could not be imported.")
-		return PolicyDetails{}, fmt.Errorf("%s", err.Error)
+		c.debugln("PolicyDetails(): Policy details could not be retrieved.")
+		return PolicyDetailsResponse{}, fmt.Errorf("%s", err.Error)
 	}
 }
 
