@@ -6,6 +6,37 @@ import (
 	"net/http"
 )
 
+// PolicyDetails returns details for the given policy.
+// It requires an http.Client pointer to make the request to Nessus.
+func (c *Client) PolicyDetails(httpClient *http.Client, policyID int) (PolicyDetails, error) {
+	c.debugln("ImportPolicy(): Building import policy URL")
+	url := fmt.Sprintf("https://%s:%s/policies/%d", c.ip, c.port, policyID)
+
+	statusCode, body, err := c.get(httpClient, url)
+	if err != nil {
+		return PolicyDetails{}, err
+	}
+
+	switch statusCode {
+	case 200:
+		var policyDetails PolicyDetails
+		err = json.Unmarshal(body, &policyDetails)
+		if err != nil {
+			return PolicyDetails{}, err
+		}
+		c.debugln("ImportPolicy(): Successfully imported policy file.")
+		return policyDetails, nil
+	default:
+		var err ErrorResponse
+		unmarshalError := json.Unmarshal(body, &err)
+		if unmarshalError != nil {
+			return PolicyDetails{}, unmarshalError
+		}
+		c.debugln("ImportPolicy(): Policy file could not be imported.")
+		return PolicyDetails{}, fmt.Errorf("%s", err.Error)
+	}
+}
+
 // ImportPolicy imports an existing policy uploaded using Nessus.file
 // (.nessus format only).
 // It requires an http.Client pointer to make the request to Nessus.

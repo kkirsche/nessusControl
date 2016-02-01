@@ -20,3 +20,9 @@ type PolicyResponse struct {
 	UserPermissions      int    `json:"user_permissions"`
 	Visibility           string `json:"visibility"`
 }
+
+type PolicyDetails struct {
+	Plugins  interface{} `json:"plugins"`
+	Settings interface{} `json:"settings"`
+	UUID     string      `json:"uuid"`
+}
