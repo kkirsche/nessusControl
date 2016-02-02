@@ -1,8 +1,4 @@
-[![Build Status](https://travis-ci.org/kkirsche/nessusControl.svg?branch=master)](https://travis-ci.org/kkirsche/nessusControl)
-
-API Client: [![GoDoc](https://godoc.org/github.com/kkirsche/nessusControl/api?status.svg)](https://godoc.org/github.com/kkirsche/nessusControl/api)
-
-Import Pipeline: [![GoDoc](https://godoc.org/github.com/kkirsche/nessusControl/import?status.svg)](https://godoc.org/github.com/kkirsche/nessusControl/import)
+[![Build Status](https://travis-ci.org/kkirsche/nessusControl.svg?branch=master)](https://travis-ci.org/kkirsche/nessusControl) [![GoDoc](https://godoc.org/github.com/kkirsche/nessusControl?status.svg)](https://godoc.org/github.com/kkirsche/nessusControl)
 
 # GoNessus
 Golang Nessus Control Client.

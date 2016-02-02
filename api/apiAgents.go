@@ -1,3 +1,7 @@
+// Package nessusAPI implements Tenable's Nessus 6 product API.
+//
+// The tests for the package should be used as examples, and include the session
+// creation as well as the actual method to make copy and paste usage easier.
 package nessusAPI
 
 import (
