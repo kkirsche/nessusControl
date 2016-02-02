@@ -6,6 +6,37 @@ import (
 	"net/http"
 )
 
+// CreateScan creates a new scan.
+// It requires an http.Client pointer to make the request to Nessus.
+func (c *Client) CreateScan(httpClient *http.Client, newScanJSON string) (CreateScanResponse, error) {
+	c.debugln("CreateScan(): Building create scan URL")
+	url := fmt.Sprintf("https://%s:%s/scans", c.ip, c.port)
+
+	statusCode, body, err := c.postWithJSON(httpClient, url, []byte(newScanJSON))
+	if err != nil {
+		return CreateScanResponse{}, err
+	}
+
+	switch statusCode {
+	case 200:
+		var createdScan CreateScanResponse
+		err = json.Unmarshal(body, &createdScan)
+		if err != nil {
+			return CreateScanResponse{}, err
+		}
+		c.debugln("ExportScan(): Successfully created scan.")
+		return createdScan, nil
+	default:
+		var err ErrorResponse
+		unmarshalError := json.Unmarshal(body, &err)
+		if unmarshalError != nil {
+			return CreateScanResponse{}, unmarshalError
+		}
+		c.debugln("ExportScan(): Could not create scan.")
+		return CreateScanResponse{}, fmt.Errorf("%s", err.Error)
+	}
+}
+
 // DeleteScan deletes a scan. NOTE: Scans in running, paused or stopping
 // states can not be deleted.
 // It requires an http.Client pointer to make the request to Nessus.

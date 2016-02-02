@@ -9,6 +9,40 @@ import (
 	"testing"
 )
 
+func TestCreateScan(t *testing.T) {
+	testServer := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		response := `{"scan":{"container_id":0,"uuid":"template-9f6a69d0-709e-22b1-f696-e1de009f6a8faf787b8b14d3a111","name":"Example Scan","description":null,"policy_id":40,"scanner_id":1,"emails":null,"sms":null,"enabled":true,"use_dashboard":false,"dashboard_file":null,"scan_time_window":null,"custom_targets":"localhost","starttime":null,"rrules":null,"timezone":null,"notification_filters":null,"shared":0,"user_permissions":128,"default_permisssions":0,"owner":"testU","owner_id":3,"last_modification_date":1454379756,"creation_date":1454379756,"type":"public","id":41}}`
+		fmt.Fprintln(w, response)
+	}))
+	defer testServer.Close()
+
+	transport := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+
+	httpClient := &http.Client{Transport: transport}
+
+	port := strings.Split(testServer.URL, ":")[2]
+
+	client := &Client{
+		username: "testU",
+		password: "testP",
+		ip:       "127.0.0.1",
+		port:     port,
+	}
+
+	client, err := client.CreateSession(httpClient)
+	if err != nil {
+		t.FailNow()
+	}
+
+	createdScan, err := client.CreateScan(httpClient, `{"uuid":"ad629e16-03b6-8c1d-cef6-ef8c9dd3c658d24bd260ef5f9e66","settings":{"name":"Example Scan", "text_targets":"localhost"}}`)
+	if err != nil || createdScan.Scan.Name != "Example Scan" {
+		t.FailNow()
+	}
+}
+
 func TestDeleteScan(t *testing.T) {
 	testServer := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")

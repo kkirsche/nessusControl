@@ -133,7 +133,7 @@ type ScanDetails struct {
 		Name            string      `json:"name"`
 		NoTarget        interface{} `json:"no_target"`
 		ObjectID        int         `json:"object_id"`
-		Pci_can_upload  bool        `json:"pci-can-upload"`
+		PCICanUpload    bool        `json:"pci-can-upload"`
 		Policy          string      `json:"policy"`
 		ScanEnd         int         `json:"scan_end"`
 		ScanStart       int         `json:"scan_start"`
@@ -169,4 +169,35 @@ type ScanDetails struct {
 		SeverityIndex int    `json:"severity_index"`
 		VulnIndex     int    `json:"vuln_index"`
 	} `json:"vulnerabilities"`
+}
+
+// CreateScanResponse is the Nessus server response when successfully creating
+// a scan
+type CreateScanResponse struct {
+	Scan struct {
+		CreationDate           int    `json:"creation_date"`
+		CustomTargets          string `json:"custom_targets"`
+		DefaultPermisssions    int    `json:"default_permisssions"`
+		Description            string `json:"description"`
+		Emails                 string `json:"emails"`
+		Enabled                bool   `json:"enabled"`
+		ID                     int    `json:"id"`
+		LastModificationDate   int    `json:"last_modification_date"`
+		Name                   string `json:"name"`
+		NotificationFilterType string `json:"notification_filter_type"`
+		NotificationFilters    string `json:"notification_filters"`
+		Owner                  string `json:"owner"`
+		OwnerID                int    `json:"owner_id"`
+		PolicyID               int    `json:"policy_id"`
+		Rrules                 string `json:"rrules"`
+		ScannerID              int    `json:"scanner_id"`
+		Shared                 int    `json:"shared"`
+		Starttime              string `json:"starttime"`
+		TagID                  int    `json:"tag_id"`
+		Timezone               string `json:"timezone"`
+		Type                   string `json:"type"`
+		UseDashboard           bool   `json:"use_dashboard"`
+		UserPermissions        int    `json:"user_permissions"`
+		UUID                   string `json:"uuid"`
+	} `json:"scan"`
 }
