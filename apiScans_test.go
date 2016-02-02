@@ -9,6 +9,74 @@ import (
 	"testing"
 )
 
+func TestDeleteScan(t *testing.T) {
+	testServer := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		response := `{"token":"Example"}` // Example for CreateSession, this method does not return a result
+		fmt.Fprintln(w, response)
+	}))
+	defer testServer.Close()
+
+	transport := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+
+	httpClient := &http.Client{Transport: transport}
+
+	port := strings.Split(testServer.URL, ":")[2]
+
+	client := &Client{
+		username: "testU",
+		password: "testP",
+		ip:       "127.0.0.1",
+		port:     port,
+	}
+
+	client, err := client.CreateSession(httpClient)
+	if err != nil {
+		t.FailNow()
+	}
+
+	successfullyDeletedHistory, err := client.DeleteScan(httpClient, 36)
+	if err != nil || successfullyDeletedHistory != true {
+		t.FailNow()
+	}
+}
+
+func TestDeleteScanHistory(t *testing.T) {
+	testServer := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		response := `{"token":"Example"}` // Example for CreateSession, this method does not return a result
+		fmt.Fprintln(w, response)
+	}))
+	defer testServer.Close()
+
+	transport := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+
+	httpClient := &http.Client{Transport: transport}
+
+	port := strings.Split(testServer.URL, ":")[2]
+
+	client := &Client{
+		username: "testU",
+		password: "testP",
+		ip:       "127.0.0.1",
+		port:     port,
+	}
+
+	client, err := client.CreateSession(httpClient)
+	if err != nil {
+		t.FailNow()
+	}
+
+	successfullyDeletedHistory, err := client.DeleteScanHistory(httpClient, 36, 1)
+	if err != nil || successfullyDeletedHistory != true {
+		t.FailNow()
+	}
+}
+
 func TestScanDetails(t *testing.T) {
 	testServer := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -39,7 +107,6 @@ func TestScanDetails(t *testing.T) {
 
 	scanDetails, err := client.ScanDetails(httpClient, 36)
 	if err != nil || scanDetails.Info.Control != true {
-		fmt.Println(err)
 		t.FailNow()
 	}
 }

@@ -6,6 +6,59 @@ import (
 	"net/http"
 )
 
+// DeleteScan deletes a scan. NOTE: Scans in running, paused or stopping
+// states can not be deleted.
+// It requires an http.Client pointer to make the request to Nessus.
+func (c *Client) DeleteScan(httpClient *http.Client, scanID int) (bool, error) {
+	c.debugln("DeleteScan(): Building delete scan URL")
+	url := fmt.Sprintf("https://%s:%s/scans/%d", c.ip, c.port, scanID)
+
+	statusCode, body, err := c.delete(httpClient, url)
+	if err != nil {
+		return false, err
+	}
+
+	switch statusCode {
+	case 200:
+		c.debugln("DeleteScan(): Successfully deleted scan.")
+		return true, nil
+	default:
+		var err ErrorResponse
+		unmarshalError := json.Unmarshal(body, &err)
+		if unmarshalError != nil {
+			return false, unmarshalError
+		}
+		c.debugln("DeleteScan(): Scan could not be deleted.")
+		return false, fmt.Errorf("%s", err.Error)
+	}
+}
+
+// DeleteScanHistory deletes historical results from a scan.
+// It requires an http.Client pointer to make the request to Nessus.
+func (c *Client) DeleteScanHistory(httpClient *http.Client, scanID, historyID int) (bool, error) {
+	c.debugln("DeleteScanHistory(): Building delete scan history URL")
+	url := fmt.Sprintf("https://%s:%s/scans/%d/history/%d", c.ip, c.port, scanID, historyID)
+
+	statusCode, body, err := c.delete(httpClient, url)
+	if err != nil {
+		return false, err
+	}
+
+	switch statusCode {
+	case 200:
+		c.debugln("DeleteScanHistory(): Successfully deleted scan history.")
+		return true, nil
+	default:
+		var err ErrorResponse
+		unmarshalError := json.Unmarshal(body, &err)
+		if unmarshalError != nil {
+			return false, unmarshalError
+		}
+		c.debugln("PauseScan(): Scan history could not be deleted.")
+		return false, fmt.Errorf("%s", err.Error)
+	}
+}
+
 // ScanDetails downloads an exported scan.
 // It requires an http.Client pointer to make the request to Nessus.
 func (c *Client) ScanDetails(httpClient *http.Client, scanID int) (ScanDetails, error) {
