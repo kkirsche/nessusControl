@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Data>
+	<request_id>123</request_id>
+	<method>atomic</method>
+	<target_ips>192.168.2.0/24</target_ips>
+	<target_ips>192.168.3.0/24</target_ips>
+</Data>
