@@ -6,6 +6,63 @@ import (
 	"net/http"
 )
 
+// ScanDetails downloads an exported scan.
+// It requires an http.Client pointer to make the request to Nessus.
+func (c *Client) ScanDetails(httpClient *http.Client, scanID int) (ScanDetails, error) {
+	c.debugln("ScanDetails(): Building scan details URL.")
+	url := fmt.Sprintf("https://%s:%s/scans/%d", c.ip, c.port, scanID)
+
+	statusCode, body, err := c.get(httpClient, url)
+	if err != nil {
+		return ScanDetails{}, err
+	}
+
+	switch statusCode {
+	case 200:
+		var scanDetails ScanDetails
+		err = json.Unmarshal(body, &scanDetails)
+		if err != nil {
+			return ScanDetails{}, err
+		}
+		c.debugln("ScanDetails(): Successfully retrieved scan details.")
+		return scanDetails, nil
+	default:
+		var err ErrorResponse
+		unmarshalError := json.Unmarshal(body, &err)
+		if unmarshalError != nil {
+			return ScanDetails{}, unmarshalError
+		}
+		c.debugln("ScanDetails(): Scan details not be retrieved.")
+		return ScanDetails{}, fmt.Errorf("%s", err.Error)
+	}
+}
+
+// DownloadScan downloads an exported scan.
+// It requires an http.Client pointer to make the request to Nessus.
+func (c *Client) DownloadScan(httpClient *http.Client, scanID, fileID int) (string, error) {
+	c.debugln("DownloadScan(): Building download scan URL.")
+	url := fmt.Sprintf("https://%s:%s/scans/%d/export/%d/download", c.ip, c.port, scanID, fileID)
+
+	statusCode, body, err := c.get(httpClient, url)
+	if err != nil {
+		return "", err
+	}
+
+	switch statusCode {
+	case 200:
+		c.debugln("DownloadScan(): Successfully downloaded scan.")
+		return string(body), nil
+	default:
+		var err ErrorResponse
+		unmarshalError := json.Unmarshal(body, &err)
+		if unmarshalError != nil {
+			return "", unmarshalError
+		}
+		c.debugln("DownloadScan(): Scan could not be downloaded.")
+		return "", fmt.Errorf("%s", err.Error)
+	}
+}
+
 // ExportScan exports the given scan.
 // It requires an http.Client pointer to make the request to Nessus.
 func (c *Client) ExportScan(httpClient *http.Client, scanID int, exportSettingsJSON string) (ExportedScan, error) {
