@@ -6,6 +6,37 @@ import (
 	"net/http"
 )
 
+// ScanExportStatus launches a scan.
+// It requires an http.Client pointer to make the request to Nessus.
+func (c *Client) ScanExportStatus(httpClient *http.Client, scanID, fileID int) (ScanExportStatus, error) {
+	c.debugln("ScanExportStatus(): Building export scan status URL")
+	url := fmt.Sprintf("https://%s:%s/scans/%d/export/%d/status", c.ip, c.port, scanID, fileID)
+
+	statusCode, body, err := c.get(httpClient, url)
+	if err != nil {
+		return ScanExportStatus{}, err
+	}
+
+	switch statusCode {
+	case 200:
+		var exportStatus ScanExportStatus
+		err = json.Unmarshal(body, &exportStatus)
+		if err != nil {
+			return ScanExportStatus{}, err
+		}
+		c.debugln("ScanExportStatus(): Successfully retrieved scan export status.")
+		return exportStatus, nil
+	default:
+		var err ErrorResponse
+		unmarshalError := json.Unmarshal(body, &err)
+		if unmarshalError != nil {
+			return ScanExportStatus{}, unmarshalError
+		}
+		c.debugln("ScanExportStatus(): Scan export status not be retrieved.")
+		return ScanExportStatus{}, fmt.Errorf("%s", err.Error)
+	}
+}
+
 // LaunchScan launches a scan.
 // It requires an http.Client pointer to make the request to Nessus.
 func (c *Client) LaunchScan(httpClient *http.Client, scanID int) (LaunchedScan, error) {

@@ -1,5 +1,11 @@
 package nessus
 
+// ScanExportStatus is the current status of the scan result exporting.
+// A status of "ready" indicates the file can be downloaded.
+type ScanExportStatus struct {
+	Status string `json:"status"`
+}
+
 // LaunchedScan is returned when a scan is successfully launched
 type LaunchedScan struct {
 	ScanUUID string `json:"scan_uuid"`
