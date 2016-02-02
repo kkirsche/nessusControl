@@ -8,7 +8,6 @@ import (
 	"testing"
 )
 
-// IngestPipeline is used to run the creator's ingest pipeline
 func TestIngestPipeline(t *testing.T) {
 	transport := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
