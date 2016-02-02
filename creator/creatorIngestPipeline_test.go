@@ -14,16 +14,17 @@ func TestIngestPipeline(t *testing.T) {
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
 	httpClient := &http.Client{Transport: transport}
-	debug := false
-	apiClient := nessusAPI.NewAccessTokenClient("127.0.0.1", "8834", "testU", "testP", debug)
+	debugEnabled := false
+	moveFilesDuringPipeline := false
+	apiClient := nessusAPI.NewAccessTokenClient("127.0.0.1", "8834", "testU", "testP", debugEnabled)
 
 	pwd, err := os.Getwd()
 	if err != nil {
 		t.FailNow()
 	}
 
-	creator := NewCreator(pwd+"/test/fixtures", apiClient, httpClient, debug)
-	err = creator.IngestPipeline(false)
+	creator := NewCreator(pwd+"/test/fixtures", apiClient, httpClient, debugEnabled)
+	err = creator.IngestPipeline(moveFilesDuringPipeline)
 	if err != nil {
 		t.FailNow()
 	}
