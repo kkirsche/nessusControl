@@ -1,7 +1,6 @@
 package nessusCreator
 
 import (
-	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"github.com/kkirsche/nessusControl/api"
@@ -10,19 +9,38 @@ import (
 	"sync"
 )
 
-func (c *Creator) createScan(createScanCh chan nessusAPI.CreateScan, skipTLSVerify bool) chan nessusAPI.CreateScanResponse {
+func (c *Creator) launchScan(httpClient *http.Client, createdScanResponseCh chan nessusAPI.CreateScanResponse) chan nessusAPI.LaunchedScan {
+	launchedScanCh := make(chan nessusAPI.LaunchedScan)
+	wg := new(sync.WaitGroup)
+
+	for createdScanResponse := range createdScanResponseCh {
+		wg.Add(1)
+		go func(c *Creator, wg *sync.WaitGroup, launchedScanCh chan nessusAPI.LaunchedScan, createdScanResponse nessusAPI.CreateScanResponse) {
+			launchedScan, err := c.apiClient.LaunchScan(httpClient, createdScanResponse.Scan.ID)
+			if err == nil {
+				launchedScanCh <- launchedScan
+			}
+			wg.Done()
+		}(c, wg, launchedScanCh, createdScanResponse)
+	}
+
+	go func(wg *sync.WaitGroup, launchedScanCh chan nessusAPI.LaunchedScan) {
+		wg.Wait()
+		close(launchedScanCh)
+	}(wg, launchedScanCh)
+
+	return launchedScanCh
+}
+
+func (c *Creator) createScan(httpClient *http.Client, createScanCh chan nessusAPI.CreateScan) chan nessusAPI.CreateScanResponse {
 	c.debugln("createScan(): Creating scans from JSON")
 	createScanResponseCh := make(chan nessusAPI.CreateScanResponse)
 	wg := new(sync.WaitGroup)
 
-	transport := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: skipTLSVerify},
-	}
-	httpClient := &http.Client{Transport: transport}
-
+	c.debugln("createScan(): Creating scans now")
 	for createScanJSON := range createScanCh {
 		wg.Add(1)
-		go func(createScanJSON nessusAPI.CreateScan, wg *sync.WaitGroup, httpClient *http.Client) {
+		go func(c *Creator, createScanJSON nessusAPI.CreateScan, wg *sync.WaitGroup, httpClient *http.Client) {
 			marshalledJSON, err := json.Marshal(createScanJSON)
 			if err != nil {
 				wg.Done()
@@ -34,7 +52,7 @@ func (c *Creator) createScan(createScanCh chan nessusAPI.CreateScan, skipTLSVeri
 				createScanResponseCh <- createdScan
 			}
 			wg.Done()
-		}(createScanJSON, wg, httpClient)
+		}(c, createScanJSON, wg, httpClient)
 	}
 
 	go func(wg *sync.WaitGroup, createScanResponseCh chan nessusAPI.CreateScanResponse) {

@@ -289,7 +289,7 @@ func (c *Client) LaunchScan(httpClient *http.Client, scanID int) (LaunchedScan, 
 		if err != nil {
 			return LaunchedScan{}, err
 		}
-		c.debugln("Launch(): Successfully launched scan.")
+		c.debugln("LaunchScan(): Successfully launched scan.")
 		return launchedScan, nil
 	default:
 		var err ErrorResponse

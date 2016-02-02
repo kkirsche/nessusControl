@@ -10,6 +10,75 @@ import (
 	"testing"
 )
 
+func TestLaunchScan(t *testing.T) {
+	testServer := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		response := `{"scan_uuid": "3390954f-63b5-1604-78b9-94237d20c69fd45c9012e5d18f69"}`
+		fmt.Fprintln(w, response)
+	}))
+	defer testServer.Close()
+
+	transport := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+
+	httpClient := &http.Client{Transport: transport}
+
+	port := strings.Split(testServer.URL, ":")[2]
+
+	client := nessusAPI.NewUsernameClient("127.0.0.1", port, "testU", "testP", false)
+
+	client, err := client.CreateSession(httpClient)
+	if err != nil {
+		t.FailNow()
+	}
+
+	creator := NewCreator("/some/place", client, false)
+	createdScanCh := make(chan nessusAPI.CreateScanResponse)
+
+	go func(createdScanCh chan nessusAPI.CreateScanResponse) {
+		for i := 0; i < 5; i++ {
+			scanSetting := struct {
+				CreationDate           int    `json:"creation_date"`
+				CustomTargets          string `json:"custom_targets"`
+				DefaultPermisssions    int    `json:"default_permisssions"`
+				Description            string `json:"description"`
+				Emails                 string `json:"emails"`
+				Enabled                bool   `json:"enabled"`
+				ID                     int    `json:"id"`
+				LastModificationDate   int    `json:"last_modification_date"`
+				Name                   string `json:"name"`
+				NotificationFilterType string `json:"notification_filter_type"`
+				NotificationFilters    string `json:"notification_filters"`
+				Owner                  string `json:"owner"`
+				OwnerID                int    `json:"owner_id"`
+				PolicyID               int    `json:"policy_id"`
+				Rrules                 string `json:"rrules"`
+				ScannerID              int    `json:"scanner_id"`
+				Shared                 int    `json:"shared"`
+				Starttime              string `json:"starttime"`
+				TagID                  int    `json:"tag_id"`
+				Timezone               string `json:"timezone"`
+				Type                   string `json:"type"`
+				UseDashboard           bool   `json:"use_dashboard"`
+				UserPermissions        int    `json:"user_permissions"`
+				UUID                   string `json:"uuid"`
+			}{ID: 1}
+			createdScanCh <- nessusAPI.CreateScanResponse{
+				Scan: scanSetting,
+			}
+		}
+		close(createdScanCh)
+	}(createdScanCh)
+
+	launchedScanCh := creator.launchScan(httpClient, createdScanCh)
+	for launchedScan := range launchedScanCh {
+		if launchedScan.ScanUUID != "3390954f-63b5-1604-78b9-94237d20c69fd45c9012e5d18f69" {
+			t.FailNow()
+		}
+	}
+}
+
 func TestCreateScanJSON(t *testing.T) {
 	testServer := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -56,9 +125,10 @@ func TestCreateScanJSON(t *testing.T) {
 		close(createScanCh)
 	}(createScanCh)
 
-	createScanResponseCh := creator.createScan(createScanCh, true)
+	createScanResponseCh := creator.createScan(httpClient, createScanCh)
 	for createdScanResponse := range createScanResponseCh {
-		if createdScanResponse.Scan.UUID != "template-9f6a69d0-709e-22b1-f696-e1de009f6a8faf787b8b14d3a111" {
+		if createdScanResponse.Scan.UUID != "template-9f6a69d0-709e-22b1-f696-e1de009f6a8faf787b8b14d3a111" ||
+			createdScanResponse.Scan.Name != "Example Scan" {
 			t.FailNow()
 		}
 	}
