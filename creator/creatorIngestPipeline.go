@@ -1,10 +1,10 @@
 package nessusCreator
 
 import (
-	"fmt"
+	"log"
 )
 
-// Ingest
+// IngestPipeline is used to run the creator's ingest pipeline
 func (c *Creator) IngestPipeline() error {
 	requestedScanCh, err := c.processRequestedScanDirectory(c.fileLocations.incomingDirectory)
 	if err != nil {
@@ -15,7 +15,7 @@ func (c *Creator) IngestPipeline() error {
 	launchedScanCh := c.launchScan(createdScanCh)
 
 	for launchedScan := range launchedScanCh {
-		fmt.Println(launchedScan.ScanUUID)
+		log.Println(launchedScan.ScanUUID)
 	}
 	return nil
 }

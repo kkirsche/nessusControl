@@ -9,35 +9,40 @@ import (
 )
 
 func (c *Creator) launchScan(createdScanResponseCh chan nessusAPI.CreateScanResponse) chan nessusAPI.LaunchedScan {
+	c.debugln("launchScan(): Creating launched scan channel.")
 	launchedScanCh := make(chan nessusAPI.LaunchedScan)
-	wg := new(sync.WaitGroup)
+	var wg sync.WaitGroup
 
 	for createdScanResponse := range createdScanResponseCh {
 		wg.Add(1)
+		c.debugln("launchScan(): Launching scan " + createdScanResponse.Scan.Name)
 		go func(c *Creator, wg *sync.WaitGroup, launchedScanCh chan nessusAPI.LaunchedScan, createdScanResponse nessusAPI.CreateScanResponse) {
 			launchedScan, err := c.apiClient.LaunchScan(c.httpClient, createdScanResponse.Scan.ID)
-			if err == nil {
+			if err != nil {
+				c.debugln("launchScan(): Failed to launch scan with error " + err.Error())
+			} else {
 				launchedScanCh <- launchedScan
 			}
 			wg.Done()
-		}(c, wg, launchedScanCh, createdScanResponse)
+		}(c, &wg, launchedScanCh, createdScanResponse)
 	}
 
 	go func(wg *sync.WaitGroup, launchedScanCh chan nessusAPI.LaunchedScan) {
 		wg.Wait()
+		c.debugln("launchScan(): Closing launched scan channel.")
 		close(launchedScanCh)
-	}(wg, launchedScanCh)
+	}(&wg, launchedScanCh)
 
 	return launchedScanCh
 }
 
 func (c *Creator) createScan(createScanJSONCh chan nessusAPI.CreateScan) chan nessusAPI.CreateScanResponse {
+	var wg sync.WaitGroup
 	c.debugln("createScan(): Creating scans from JSON")
 	createScanResponseCh := make(chan nessusAPI.CreateScanResponse)
-	wg := new(sync.WaitGroup)
 
-	c.debugln("createScan(): Creating scans now")
 	for createScanJSON := range createScanJSONCh {
+		c.debugln("createScan(): Creating scan")
 		wg.Add(1)
 		go func(c *Creator, createScanJSON nessusAPI.CreateScan, wg *sync.WaitGroup) {
 			marshalledJSON, err := json.Marshal(createScanJSON)
@@ -47,17 +52,21 @@ func (c *Creator) createScan(createScanJSONCh chan nessusAPI.CreateScan) chan ne
 			}
 
 			createdScan, err := c.apiClient.CreateScan(c.httpClient, string(marshalledJSON))
-			if err == nil {
+			if err != nil {
+				c.debugln("createScan(): Failed to create scan with error: " + err.Error())
+			} else {
+				c.debugln("createScan(): Successfully created scan " + createdScan.Scan.Name)
 				createScanResponseCh <- createdScan
 			}
 			wg.Done()
-		}(c, createScanJSON, wg)
+		}(c, createScanJSON, &wg)
 	}
 
 	go func(wg *sync.WaitGroup, createScanResponseCh chan nessusAPI.CreateScanResponse) {
 		wg.Wait()
+		c.debugln("createScan(): Closing create scan channel.")
 		close(createScanResponseCh)
-	}(wg, createScanResponseCh)
+	}(&wg, createScanResponseCh)
 
 	return createScanResponseCh
 }
@@ -66,8 +75,8 @@ func (c *Creator) createScan(createScanJSONCh chan nessusAPI.CreateScan) chan ne
 // JSON and sent to a remote Nessus server.
 func (c *Creator) buildCreateScanJSON(requestScanch chan RequestedScan) chan nessusAPI.CreateScan {
 	c.debugln("buildCreateScanJSON(): Building JSON for Create Scan")
+	var wg sync.WaitGroup
 	createScanJSONch := make(chan nessusAPI.CreateScan)
-	wg := new(sync.WaitGroup)
 
 	for requestedScan := range requestScanch {
 		wg.Add(1)
@@ -93,13 +102,14 @@ func (c *Creator) buildCreateScanJSON(requestScanch chan RequestedScan) chan nes
 				},
 			}
 			wg.Done()
-		}(requestedScan, wg, createScanJSONch)
+		}(requestedScan, &wg, createScanJSONch)
 	}
 
 	go func(wg *sync.WaitGroup, createScanJSONch chan nessusAPI.CreateScan) {
 		wg.Wait()
+		c.debugln("buildCreateScanJSON(): Closing create scan JSON channel.")
 		close(createScanJSONch)
-	}(wg, createScanJSONch)
+	}(&wg, createScanJSONch)
 
 	return createScanJSONch
 }

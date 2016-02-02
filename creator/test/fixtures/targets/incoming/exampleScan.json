@@ -1,0 +1,7 @@
+{
+  "request_id": "123",
+  "method": "atomic",
+  "target_ips": [
+    "127.0.0.1/32"
+  ]
+}

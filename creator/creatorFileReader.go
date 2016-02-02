@@ -14,40 +14,44 @@ import (
 
 // processRequestedScanDirectory is used to process all files in a directory to find
 func (c *Creator) processRequestedScanDirectory(directoryPath string) (chan RequestedScan, error) {
-	c.debugln("ProcessRequestedScanDirectory(): Creating response channel")
+	c.debugln("processRequestedScanDirectory(): Creating response channel")
+	var wg sync.WaitGroup
 	requestedScanCh := make(chan RequestedScan)
-	wg := new(sync.WaitGroup)
-	c.debugln("ProcessRequestedScanDirectory(): Determining files in the given directory")
+	c.debugln("processRequestedScanDirectory(): Determining files in the given directory")
 	fileArray, err := filepath.Glob(directoryPath + "/*.*")
 	if err != nil {
 		close(requestedScanCh)
 		return requestedScanCh, err
 	}
 
-	c.debugln("ProcessRequestedScanDirectory(): Starting file processing goRoutine.")
-	go func(wg *sync.WaitGroup, c *Creator, fileArray []string, requestedScanCh chan RequestedScan) {
-		for _, pathToFile := range fileArray {
-			wg.Add(1)
-			go func(wg *sync.WaitGroup, c *Creator, pathToFile string, requestedScanCh chan RequestedScan) {
-				requestedScan, err := c.processRequestedScanFile(pathToFile)
-				if err != nil {
-					c.debugln("ProcessRequestedScanDirectory(): Error while parsing " + pathToFile)
-					requestedScanCh <- RequestedScan{}
-				} else {
-					requestedScanCh <- requestedScan
-				}
-				wg.Done()
-			}(wg, c, pathToFile, requestedScanCh)
-		}
+	if len(fileArray) == 0 {
+		close(requestedScanCh)
+		c.debugln("processRequestedScanDirectory(): No files were found in " + directoryPath)
+		return requestedScanCh, fmt.Errorf("No requested scan files were found in %s", directoryPath)
+	}
 
-		c.debugln("ProcessRequestedScanDirectory(): Starting close channel goRoutine")
-		go func(wg *sync.WaitGroup, requestedScanCh chan RequestedScan) {
-			wg.Wait()
-			close(requestedScanCh)
-		}(wg, requestedScanCh)
-	}(wg, c, fileArray, requestedScanCh)
+	for _, pathToFile := range fileArray {
+		c.debugln("processRequestedScanDirectory(): Starting to process " + pathToFile)
+		wg.Add(1)
+		go func(wg *sync.WaitGroup, c *Creator, pathToFile string, requestedScanCh chan RequestedScan) {
+			requestedScan, err := c.processRequestedScanFile(pathToFile)
+			if err != nil {
+				c.debugln("processRequestedScanDirectory(): Error while parsing " + pathToFile)
+			} else {
+				c.debugln("processRequestedScanDirectory(): Requested scan #" + requestedScan.RequestID + " found.")
+				requestedScanCh <- requestedScan
+			}
+			wg.Done()
+		}(&wg, c, pathToFile, requestedScanCh)
+	}
 
-	c.debugln("ProcessRequestedScanDirectory(): Returning channels")
+	go func(wg *sync.WaitGroup, requestedScanCh chan RequestedScan) {
+		wg.Wait()
+		c.debugln("processRequestedScanDirectory(): Closing output channel")
+		close(requestedScanCh)
+	}(&wg, requestedScanCh)
+
+	c.debugln("processRequestedScanDirectory(): Returning channels")
 	return requestedScanCh, nil
 }
 
