@@ -33,7 +33,7 @@ func TestLaunchScan(t *testing.T) {
 		t.FailNow()
 	}
 
-	creator := NewCreator("/some/place", client, false)
+	creator := NewCreator("/some/place", client, httpClient, false)
 	createdScanCh := make(chan nessusAPI.CreateScanResponse)
 
 	go func(createdScanCh chan nessusAPI.CreateScanResponse) {
@@ -71,7 +71,7 @@ func TestLaunchScan(t *testing.T) {
 		close(createdScanCh)
 	}(createdScanCh)
 
-	launchedScanCh := creator.launchScan(httpClient, createdScanCh)
+	launchedScanCh := creator.launchScan(createdScanCh)
 	for launchedScan := range launchedScanCh {
 		if launchedScan.ScanUUID != "3390954f-63b5-1604-78b9-94237d20c69fd45c9012e5d18f69" {
 			t.FailNow()
@@ -102,7 +102,7 @@ func TestCreateScanJSON(t *testing.T) {
 		t.FailNow()
 	}
 
-	creator := NewCreator("/some/place", client, false)
+	creator := NewCreator("/some/place", client, httpClient, false)
 	createScanCh := make(chan nessusAPI.CreateScan)
 
 	go func(createScanCh chan nessusAPI.CreateScan) {
@@ -125,7 +125,7 @@ func TestCreateScanJSON(t *testing.T) {
 		close(createScanCh)
 	}(createScanCh)
 
-	createScanResponseCh := creator.createScan(httpClient, createScanCh)
+	createScanResponseCh := creator.createScan(createScanCh)
 	for createdScanResponse := range createScanResponseCh {
 		if createdScanResponse.Scan.UUID != "template-9f6a69d0-709e-22b1-f696-e1de009f6a8faf787b8b14d3a111" ||
 			createdScanResponse.Scan.Name != "Example Scan" {

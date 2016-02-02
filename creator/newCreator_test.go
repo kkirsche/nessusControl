@@ -2,13 +2,15 @@ package nessusCreator
 
 import (
 	"github.com/kkirsche/nessusControl/api"
+	"net/http"
 	"testing"
 )
 
 func TestNewCreator(t *testing.T) {
 	debug := false
 	client := nessusAPI.NewUsernameClient("localhost", "8834", "testU", "testP", debug)
-	creator := NewCreator("/test/path", client, debug)
+	httpClient := &http.Client{}
+	creator := NewCreator("/test/path", client, httpClient, debug)
 
 	if creator.debug != false ||
 		creator.apiClient != client ||

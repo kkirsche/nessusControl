@@ -12,8 +12,8 @@ import (
 	"sync"
 )
 
-// ProcessRequestedScanDirectory is used to process all files in a directory to find
-func (c *Creator) ProcessRequestedScanDirectory(directoryPath string) (chan RequestedScan, error) {
+// processRequestedScanDirectory is used to process all files in a directory to find
+func (c *Creator) processRequestedScanDirectory(directoryPath string) (chan RequestedScan, error) {
 	c.debugln("ProcessRequestedScanDirectory(): Creating response channel")
 	requestedScanCh := make(chan RequestedScan)
 	wg := new(sync.WaitGroup)

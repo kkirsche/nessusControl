@@ -2,6 +2,7 @@ package nessusCreator
 
 import (
 	"github.com/kkirsche/nessusControl/api" // nessusAPI is not used
+	"net/http"
 )
 
 // Creator is used in the file to scan pipeline to import the scan files,
@@ -9,6 +10,7 @@ import (
 type Creator struct {
 	fileLocations fileLocations
 	apiClient     *nessusAPI.Client
+	httpClient    *http.Client
 	debug         bool
 }
 
