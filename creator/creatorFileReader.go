@@ -54,7 +54,8 @@ func (c *Creator) processRequestedScanDirectory(directoryPath string, moveFiles 
 				} else {
 					c.debugln("processRequestedScanDirectory(): Requested scan #" + requestedScan.RequestID + " found.")
 					requestedScanCh <- requestedScan
-					c.debugln("processRequestedScanDirectory(): Moving file to archive.")
+					c.debugln("processRequestedScanDirectory(): Deleting file from temporary location.")
+					os.Remove(newFilePath)
 				}
 			} else {
 				c.debugln("processRequestedScanDirectory(): Processing file.")

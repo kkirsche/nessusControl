@@ -23,7 +23,7 @@ func TestIngestPipeline(t *testing.T) {
 	}
 
 	creator := NewCreator(pwd+"/test/fixtures", apiClient, httpClient, debug)
-	err = creator.IngestPipeline(true)
+	err = creator.IngestPipeline(false)
 	if err != nil {
 		t.FailNow()
 	}
