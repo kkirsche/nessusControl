@@ -1,5 +1,10 @@
 package nessus
 
+// ExportedScan is the response when a scan is successfully exported
+type ExportedScan struct {
+	File int `json:"file"`
+}
+
 // ScanExportStatus is the current status of the scan result exporting.
 // A status of "ready" indicates the file can be downloaded.
 type ScanExportStatus struct {
