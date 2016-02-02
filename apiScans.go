@@ -63,10 +63,65 @@ func (c *Client) PauseScan(httpClient *http.Client, scanID int) (bool, error) {
 	}
 }
 
+// ToggleScanResultReadStatus changes the read status of a scan. If read is true,
+// the scan result have been read.
+// It requires an http.Client pointer to make the request to Nessus.
+func (c *Client) ToggleScanResultReadStatus(httpClient *http.Client, scanID int, read bool) (bool, error) {
+	c.debugln("ToggleScanResultReadStatus(): Building toggle scan result read status URL")
+	url := fmt.Sprintf("https://%s:%s/scans/%d/status", c.ip, c.port, scanID)
+
+	readJSON := fmt.Sprintf(`{"read":%t}`, read)
+
+	statusCode, body, err := c.putWithJSON(httpClient, url, []byte(readJSON))
+	if err != nil {
+		return false, err
+	}
+
+	switch statusCode {
+	case 200:
+		c.debugln("ToggleScanResultReadStatus(): Successfully toggled scan read status.")
+		return true, nil
+	default:
+		var err ErrorResponse
+		unmarshalError := json.Unmarshal(body, &err)
+		if unmarshalError != nil {
+			return false, unmarshalError
+		}
+		c.debugln("ToggleScanResultReadStatus(): Scan read status could not be toggled.")
+		return false, fmt.Errorf("%s", err.Error)
+	}
+}
+
+// ResumeScan stops a scan.
+// It requires an http.Client pointer to make the request to Nessus.
+func (c *Client) ResumeScan(httpClient *http.Client, scanID int) (bool, error) {
+	c.debugln("ResumeScan(): Building resume scan URL")
+	url := fmt.Sprintf("https://%s:%s/scans/%d/resume", c.ip, c.port, scanID)
+
+	statusCode, body, err := c.postWithJSON(httpClient, url, nil)
+	if err != nil {
+		return false, err
+	}
+
+	switch statusCode {
+	case 200:
+		c.debugln("ResumeScan(): Successfully resumed scan.")
+		return true, nil
+	default:
+		var err ErrorResponse
+		unmarshalError := json.Unmarshal(body, &err)
+		if unmarshalError != nil {
+			return false, unmarshalError
+		}
+		c.debugln("ResumeScan(): Scan could not be resumed.")
+		return false, fmt.Errorf("%s", err.Error)
+	}
+}
+
 // ToggleScheduledScan enables or disables a scan schedule.
 // It requires an http.Client pointer to make the request to Nessus.
 func (c *Client) ToggleScheduledScan(httpClient *http.Client, scanID int, enabled bool) (ToggleScheduledScan, error) {
-	c.debugln("StopScan(): Building stop scan URL")
+	c.debugln("ToggleScheduledScan(): Building toggle scheduled scan URL")
 	url := fmt.Sprintf("https://%s:%s/scans/%d/schedule", c.ip, c.port, scanID)
 
 	toggleJSON := fmt.Sprintf(`{"enabled": %t}`, enabled)
@@ -83,7 +138,7 @@ func (c *Client) ToggleScheduledScan(httpClient *http.Client, scanID int, enable
 		if err != nil {
 			return ToggleScheduledScan{}, err
 		}
-		c.debugln("StopScan(): Successfully stopped scan.")
+		c.debugln("ToggleScheduledScan(): Successfully toggled scan schedule.")
 		return toggledScan, nil
 	default:
 		var err ErrorResponse
@@ -91,7 +146,7 @@ func (c *Client) ToggleScheduledScan(httpClient *http.Client, scanID int, enable
 		if unmarshalError != nil {
 			return ToggleScheduledScan{}, unmarshalError
 		}
-		c.debugln("StopScan(): Scan could not be stopped.")
+		c.debugln("ToggleScheduledScan(): Scan schedule could not be toggled.")
 		return ToggleScheduledScan{}, fmt.Errorf("%s", err.Error)
 	}
 }
