@@ -43,6 +43,40 @@ func TestConfigureScan(t *testing.T) {
 	}
 }
 
+func TestCopyScan(t *testing.T) {
+	testServer := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		response := `{"id":1,"uuid":"Example","name":"Copied ExampleName","type":"Scan","owner":"testU","enabled":true,"folder_id":1,"read":true,"status":"ready","shared":true,"user_permissions":128,"creation_date":1,"last_modification_date":1,"control":true,"starttime":"sometime","timezone":"this","rrules":"something","use_dashboard":true}`
+		fmt.Fprintln(w, response)
+	}))
+	defer testServer.Close()
+
+	transport := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+
+	httpClient := &http.Client{Transport: transport}
+
+	port := strings.Split(testServer.URL, ":")[2]
+
+	client := &Client{
+		username: "testU",
+		password: "testP",
+		ip:       "127.0.0.1",
+		port:     port,
+	}
+
+	client, err := client.CreateSession(httpClient)
+	if err != nil {
+		t.FailNow()
+	}
+
+	copiedScan, err := client.CopyScan(httpClient, 1, `{"folder_id":1,"history":true,"name":"Copied ExampleName"}`)
+	if err != nil || copiedScan.Name != "Copied ExampleName" {
+		t.FailNow()
+	}
+}
+
 func TestCreateScan(t *testing.T) {
 	testServer := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")

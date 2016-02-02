@@ -37,6 +37,37 @@ func (c *Client) ConfigureScan(httpClient *http.Client, scanID int, configureSca
 	}
 }
 
+// CopyScan copies a given scan.
+// It requires an http.Client pointer to make the request to Nessus.
+func (c *Client) CopyScan(httpClient *http.Client, scanID int, copyScanJSON string) (Scan, error) {
+	c.debugln("CopyScan(): Building copy scan URL")
+	url := fmt.Sprintf("https://%s:%s/scans/%d/copy", c.ip, c.port, scanID)
+
+	statusCode, body, err := c.postWithJSON(httpClient, url, []byte(copyScanJSON))
+	if err != nil {
+		return Scan{}, err
+	}
+
+	switch statusCode {
+	case 200:
+		var createdScan Scan
+		err = json.Unmarshal(body, &createdScan)
+		if err != nil {
+			return Scan{}, err
+		}
+		c.debugln("CopyScan(): Successfully copied scan.")
+		return createdScan, nil
+	default:
+		var err ErrorResponse
+		unmarshalError := json.Unmarshal(body, &err)
+		if unmarshalError != nil {
+			return Scan{}, unmarshalError
+		}
+		c.debugln("CopyScan(): Could not copy scan.")
+		return Scan{}, fmt.Errorf("%s", err.Error)
+	}
+}
+
 // CreateScan creates a new scan.
 // It requires an http.Client pointer to make the request to Nessus.
 func (c *Client) CreateScan(httpClient *http.Client, newScanJSON string) (CreateScanResponse, error) {
