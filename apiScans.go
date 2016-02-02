@@ -6,6 +6,37 @@ import (
 	"net/http"
 )
 
+// ConfigureScan changes the schedule or policy parameters of a scan.
+// It requires an http.Client pointer to make the request to Nessus.
+func (c *Client) ConfigureScan(httpClient *http.Client, scanID int, configureScanJSON string) (CreateScanResponse, error) {
+	c.debugln("ConfigureScan(): Building configure scan URL")
+	url := fmt.Sprintf("https://%s:%s/scans/%d", c.ip, c.port, scanID)
+
+	statusCode, body, err := c.putWithJSON(httpClient, url, []byte(configureScanJSON))
+	if err != nil {
+		return CreateScanResponse{}, err
+	}
+
+	switch statusCode {
+	case 200:
+		var createdScan CreateScanResponse
+		err = json.Unmarshal(body, &createdScan)
+		if err != nil {
+			return CreateScanResponse{}, err
+		}
+		c.debugln("ConfigureScan(): Successfully configured scan.")
+		return createdScan, nil
+	default:
+		var err ErrorResponse
+		unmarshalError := json.Unmarshal(body, &err)
+		if unmarshalError != nil {
+			return CreateScanResponse{}, unmarshalError
+		}
+		c.debugln("ConfigureScan(): Could not configure scan.")
+		return CreateScanResponse{}, fmt.Errorf("%s", err.Error)
+	}
+}
+
 // CreateScan creates a new scan.
 // It requires an http.Client pointer to make the request to Nessus.
 func (c *Client) CreateScan(httpClient *http.Client, newScanJSON string) (CreateScanResponse, error) {
@@ -24,7 +55,7 @@ func (c *Client) CreateScan(httpClient *http.Client, newScanJSON string) (Create
 		if err != nil {
 			return CreateScanResponse{}, err
 		}
-		c.debugln("ExportScan(): Successfully created scan.")
+		c.debugln("CreateScan(): Successfully created scan.")
 		return createdScan, nil
 	default:
 		var err ErrorResponse
@@ -32,7 +63,7 @@ func (c *Client) CreateScan(httpClient *http.Client, newScanJSON string) (Create
 		if unmarshalError != nil {
 			return CreateScanResponse{}, unmarshalError
 		}
-		c.debugln("ExportScan(): Could not create scan.")
+		c.debugln("CreateScan(): Could not create scan.")
 		return CreateScanResponse{}, fmt.Errorf("%s", err.Error)
 	}
 }
