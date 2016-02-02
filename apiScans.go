@@ -6,6 +6,37 @@ import (
 	"net/http"
 )
 
+// LaunchScan launches a scan.
+// It requires an http.Client pointer to make the request to Nessus.
+func (c *Client) LaunchScan(httpClient *http.Client, scanID int) (LaunchedScan, error) {
+	c.debugln("LaunchScan(): Building launch scan URL")
+	url := fmt.Sprintf("https://%s:%s/scans/%d/launch", c.ip, c.port, scanID)
+
+	statusCode, body, err := c.postWithJSON(httpClient, url, nil)
+	if err != nil {
+		return LaunchedScan{}, err
+	}
+
+	switch statusCode {
+	case 200:
+		var launchedScan LaunchedScan
+		err = json.Unmarshal(body, &launchedScan)
+		if err != nil {
+			return LaunchedScan{}, err
+		}
+		c.debugln("Launch(): Successfully launched scan.")
+		return launchedScan, nil
+	default:
+		var err ErrorResponse
+		unmarshalError := json.Unmarshal(body, &err)
+		if unmarshalError != nil {
+			return LaunchedScan{}, unmarshalError
+		}
+		c.debugln("LaunchScan(): Scan could not be launched.")
+		return LaunchedScan{}, fmt.Errorf("%s", err.Error)
+	}
+}
+
 // ListScans returns the scan list.
 // It requires an http.Client pointer to make the request to Nessus.
 func (c *Client) ListScans(httpClient *http.Client) (ScanList, error) {

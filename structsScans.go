@@ -1,5 +1,10 @@
 package nessus
 
+// LaunchedScan is returned when a scan is successfully launched
+type LaunchedScan struct {
+	ScanUUID string `json:"scan_uuid"`
+}
+
 // ScanList is a list of scans and folders
 type ScanList struct {
 	Folders   []Folder `json:"folders"`
