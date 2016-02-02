@@ -13,7 +13,7 @@ import (
 )
 
 // processRequestedScanDirectory is used to process all files in a directory to find
-func (c *Creator) processRequestedScanDirectory(directoryPath string) (chan RequestedScan, error) {
+func (c *Creator) processRequestedScanDirectory(directoryPath string, moveFiles bool) (chan RequestedScan, error) {
 	c.debugln("processRequestedScanDirectory(): Creating response channel")
 	var wg sync.WaitGroup
 	requestedScanCh := make(chan RequestedScan)
@@ -34,12 +34,38 @@ func (c *Creator) processRequestedScanDirectory(directoryPath string) (chan Requ
 		c.debugln("processRequestedScanDirectory(): Starting to process " + pathToFile)
 		wg.Add(1)
 		go func(wg *sync.WaitGroup, c *Creator, pathToFile string, requestedScanCh chan RequestedScan) {
-			requestedScan, err := c.processRequestedScanFile(pathToFile)
-			if err != nil {
-				c.debugln("processRequestedScanDirectory(): Error while parsing " + pathToFile)
+			fileName := filename(pathToFile)
+			if moveFiles {
+				c.debugln("processRequestedScanDirectory(): Copying file to archive")
+				err := copyFile(pathToFile, c.fileLocations.archiveDirectory+"/"+fileName)
+				if err != nil {
+					c.debugln("processRequestedScanDirectory(): Could not copy file to archive")
+				}
+				newFilePath := c.fileLocations.temporaryDirectory + "/" + fileName
+				c.debugln("processRequestedScanDirectory(): Moving file to temporary directory.")
+				err = os.Rename(pathToFile, newFilePath)
+				if err != nil {
+					c.debugln("processRequestedScanDirectory(): Failed to move file to temporary directory.")
+				}
+				c.debugln("processRequestedScanDirectory(): Processing file.")
+				requestedScan, err := c.processRequestedScanFile(newFilePath)
+				if err != nil {
+					c.debugln("processRequestedScanDirectory(): Error while parsing " + newFilePath)
+				} else {
+					c.debugln("processRequestedScanDirectory(): Requested scan #" + requestedScan.RequestID + " found.")
+					requestedScanCh <- requestedScan
+					c.debugln("processRequestedScanDirectory(): Moving file to archive.")
+				}
 			} else {
-				c.debugln("processRequestedScanDirectory(): Requested scan #" + requestedScan.RequestID + " found.")
-				requestedScanCh <- requestedScan
+				c.debugln("processRequestedScanDirectory(): Processing file.")
+				requestedScan, err := c.processRequestedScanFile(pathToFile)
+				if err != nil {
+					c.debugln("processRequestedScanDirectory(): Error while parsing " + pathToFile)
+				} else {
+					c.debugln("processRequestedScanDirectory(): Requested scan #" + requestedScan.RequestID + " found.")
+					requestedScanCh <- requestedScan
+					c.debugln("processRequestedScanDirectory(): Moving file to archive.")
+				}
 			}
 			wg.Done()
 		}(&wg, c, pathToFile, requestedScanCh)

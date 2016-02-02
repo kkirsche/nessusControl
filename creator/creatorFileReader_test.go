@@ -13,7 +13,7 @@ func TestProcessRequestedScanDirectory(t *testing.T) {
 
 	creator := Creator{}
 
-	requestedScanCh, err := creator.processRequestedScanDirectory(pwd + "/test/fixtures")
+	requestedScanCh, err := creator.processRequestedScanDirectory(pwd+"/test/fixtures", false)
 	if err != nil {
 		t.FailNow()
 	}
