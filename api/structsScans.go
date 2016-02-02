@@ -201,3 +201,25 @@ type CreateScanResponse struct {
 		UUID                   string `json:"uuid"`
 	} `json:"scan"`
 }
+
+// CreateScan is the JSON object used to create a new scan in Nessus 6.
+type CreateScan struct {
+	UUID     string             `json:"uuid"`
+	Settings CreateScanSettings `json:"settings"`
+}
+
+// CreateScanSettings is the sub-JSON structure used in CreateScan when
+// generating a new scan in Nessus 6.
+type CreateScanSettings struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	FolderID    string `json:"folder_id"`
+	ScannerID   string `json:"scanner_id"`
+	PolicyID    string `json:"policy_id"`
+	TextTargets string `json:"text_targets"`
+	FileTargets string `json:"file_targets"`
+	Launch      string `json:"launch"`
+	Enabled     bool   `json:"enabled"`
+	LaunchNow   bool   `json:"launch_now"`
+	Emails      string `json:"emails"`
+}

@@ -7,9 +7,71 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"regexp"
+	"sync"
 )
 
+// ProcessRequestedScanDirectory is used to process all files in a directory to find
+func (c *Creator) ProcessRequestedScanDirectory(directoryPath string) (chan RequestedScan, error) {
+	c.debugln("ProcessRequestedScanDirectory(): Creating response channel")
+	requestedScanCh := make(chan RequestedScan)
+	wg := new(sync.WaitGroup)
+	c.debugln("ProcessRequestedScanDirectory(): Determining files in the given directory")
+	fileArray, err := filepath.Glob(directoryPath + "/*.*")
+	if err != nil {
+		close(requestedScanCh)
+		return requestedScanCh, err
+	}
+
+	c.debugln("ProcessRequestedScanDirectory(): Starting file processing goRoutine.")
+	go func(wg *sync.WaitGroup, c *Creator, fileArray []string, requestedScanCh chan RequestedScan) {
+		for _, pathToFile := range fileArray {
+			wg.Add(1)
+			go func(wg *sync.WaitGroup, c *Creator, pathToFile string, requestedScanCh chan RequestedScan) {
+				requestedScan, err := c.processRequestedScanFile(pathToFile)
+				if err != nil {
+					c.debugln("ProcessRequestedScanDirectory(): Error while parsing " + pathToFile)
+					requestedScanCh <- RequestedScan{}
+				} else {
+					requestedScanCh <- requestedScan
+				}
+				wg.Done()
+			}(wg, c, pathToFile, requestedScanCh)
+		}
+
+		c.debugln("ProcessRequestedScanDirectory(): Starting close channel goRoutine")
+		go func(wg *sync.WaitGroup, requestedScanCh chan RequestedScan) {
+			wg.Wait()
+			close(requestedScanCh)
+		}(wg, requestedScanCh)
+	}(wg, c, fileArray, requestedScanCh)
+
+	c.debugln("ProcessRequestedScanDirectory(): Returning channels")
+	return requestedScanCh, nil
+}
+
+// processRequestedScanFile is used to take a requested scan file, determine what
+// method should process it, and direct it accordingly.
+func (c *Creator) processRequestedScanFile(pathToFile string) (RequestedScan, error) {
+	switch filepath.Ext(pathToFile) {
+	case ".json":
+		c.debugln("processRequestedScanFile(): Found .json requested scan file.")
+		return c.readJSON(pathToFile)
+	case ".xml":
+		c.debugln("processRequestedScanFile(): Found .xml requested scan file.")
+		return c.readXML(pathToFile)
+	case ".txt":
+		c.debugln("processRequestedScanFile(): Found .txt requested scan file.")
+		return c.readText(pathToFile)
+	}
+
+	c.debugln("processRequestedScanFile(): Found unsupported requested scan file format.")
+	return RequestedScan{}, fmt.Errorf("Requested scan file format is not supported.")
+}
+
+// readJSON is used to read a .json requested scan file and turn it into a
+// Golang structure.
 func (c *Creator) readJSON(jsonFilePath string) (RequestedScan, error) {
 	c.debugln("readJSON(): Reading JSON file into memory")
 	fileContents, err := ioutil.ReadFile(jsonFilePath)
@@ -26,6 +88,8 @@ func (c *Creator) readJSON(jsonFilePath string) (RequestedScan, error) {
 	return requestedScan, nil
 }
 
+// readXML is used to read a .xml requested scan file and turn it into a
+// Golang structure.
 func (c *Creator) readXML(xmlFilePath string) (RequestedScan, error) {
 	c.debugln("readXML(): Reading XML file into memory")
 	fileContents, err := ioutil.ReadFile(xmlFilePath)
@@ -42,6 +106,8 @@ func (c *Creator) readXML(xmlFilePath string) (RequestedScan, error) {
 	return requestedScan, nil
 }
 
+// readText is used to read a .txt requested scan file and turn it into a
+// Golang structure.
 func (c *Creator) readText(textFilePath string) (RequestedScan, error) {
 	c.debugln("readText(): Opening file")
 	file, err := os.Open(textFilePath)
@@ -86,6 +152,7 @@ func (c *Creator) readText(textFilePath string) (RequestedScan, error) {
 	}, nil
 }
 
+// processTextFileLine is used by readText to process individual lines in the text file.
 func (c *Creator) processTextFileLine(line string) (string, string, error) {
 	c.debugln("processTextFileLine(): Creating capture regular expression")
 	captureRegexp := regexp.MustCompile(`(?P<requestid>requestid:\s*|requestid:\t)?(?P<method>method:\t|method:\s*)?(?P<result>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\/\d+|\d+|\w+)`)
