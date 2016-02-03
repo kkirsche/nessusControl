@@ -15,6 +15,7 @@ func NewCreator(baseDirectory string, client *nessusAPI.Client, httpClient *http
 		apiClient:  client,
 		debug:      debug,
 		httpClient: httpClient,
+		sqliteDB:   sqliteDB,
 		fileLocations: fileLocations{
 			baseDirectory:      baseDirectory,
 			archiveDirectory:   fmt.Sprintf("%s/targets/archive", baseDirectory),
