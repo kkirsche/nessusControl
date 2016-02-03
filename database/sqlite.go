@@ -1,3 +1,8 @@
+// Package nessusDatabase is used to connect to databases for state and result storage.
+//
+// This package is a supporting package for nessusCreator and nessusResults which
+// handle the file to launched scan pipeline and the result retriever / processing
+// functionality.
 package nessusDatabase
 
 import (
