@@ -10,6 +10,10 @@ import (
 )
 
 func (c *Creator) saveLaunchedScan(launchedScanCh chan ScanData) error {
+	if c.sqliteDB == nil {
+		return fmt.Errorf("No database connection was found.")
+	}
+
 	c.debugln("Creating active_scans table in SQLite database if it doesn't exist already.")
 	_, err := c.sqliteDB.Exec("CREATE TABLE IF NOT EXISTS active_scans (request_id bigint, method varchar(200), scan_uuid varchar(250), scan_id integer, scan_starttime varchar(255));")
 	if err != nil {

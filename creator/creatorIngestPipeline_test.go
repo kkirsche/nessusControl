@@ -3,6 +3,7 @@ package nessusCreator
 import (
 	"crypto/tls"
 	"github.com/kkirsche/nessusControl/api"
+	"github.com/kkirsche/nessusControl/database"
 	"net/http"
 	"os"
 	"testing"
@@ -22,7 +23,12 @@ func TestIngestPipeline(t *testing.T) {
 		t.FailNow()
 	}
 
-	creator := NewCreator(pwd+"/test/fixtures", apiClient, httpClient, nil, debugEnabled)
+	testDB, err := nessusDatabase.ConnectToSQLite(pwd + "/test/fixtures/testDatabase.db")
+	if err != nil {
+		t.FailNow()
+	}
+
+	creator := NewCreator(pwd+"/test/fixtures", apiClient, httpClient, testDB, debugEnabled)
 	err = creator.IngestPipeline(moveFilesDuringPipeline)
 	if err != nil {
 		t.FailNow()

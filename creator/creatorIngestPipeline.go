@@ -19,5 +19,8 @@ func (c *Creator) IngestPipeline(moveFiles bool) error {
 	createdScanCh := c.createScan(createScanJSONCh)
 	launchedScanCh := c.launchScan(createdScanCh)
 	err = c.saveLaunchedScan(launchedScanCh)
+	if err != nil {
+		return err
+	}
 	return nil
 }
