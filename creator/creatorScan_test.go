@@ -33,10 +33,10 @@ func TestLaunchScan(t *testing.T) {
 		t.FailNow()
 	}
 
-	creator := NewCreator("/some/place", client, httpClient, false)
-	createdScanCh := make(chan nessusAPI.CreateScanResponse)
+	creator := NewCreator("/some/place", client, httpClient, nil, false)
+	createdScanCh := make(chan ScanData)
 
-	go func(createdScanCh chan nessusAPI.CreateScanResponse) {
+	go func(createdScanCh chan ScanData) {
 		for i := 0; i < 5; i++ {
 			scanSetting := struct {
 				CreationDate           int    `json:"creation_date"`
@@ -64,16 +64,17 @@ func TestLaunchScan(t *testing.T) {
 				UserPermissions        int    `json:"user_permissions"`
 				UUID                   string `json:"uuid"`
 			}{ID: 1}
-			createdScanCh <- nessusAPI.CreateScanResponse{
+			createdScanCh <- ScanData{CreatedScan: nessusAPI.CreateScanResponse{
 				Scan: scanSetting,
+			},
 			}
 		}
 		close(createdScanCh)
 	}(createdScanCh)
 
 	launchedScanCh := creator.launchScan(createdScanCh)
-	for launchedScan := range launchedScanCh {
-		if launchedScan.ScanUUID != "3390954f-63b5-1604-78b9-94237d20c69fd45c9012e5d18f69" {
+	for launchedScanData := range launchedScanCh {
+		if launchedScanData.LaunchedScan.ScanUUID != "3390954f-63b5-1604-78b9-94237d20c69fd45c9012e5d18f69" {
 			t.FailNow()
 		}
 	}
@@ -102,23 +103,25 @@ func TestCreateScanJSON(t *testing.T) {
 		t.FailNow()
 	}
 
-	creator := NewCreator("/some/place", client, httpClient, false)
-	createScanCh := make(chan nessusAPI.CreateScan)
+	creator := NewCreator("/some/place", client, httpClient, nil, false)
+	createScanCh := make(chan ScanData)
 
-	go func(createScanCh chan nessusAPI.CreateScan) {
+	go func(createScanCh chan ScanData) {
 		for i := 0; i < 5; i++ {
-			createScanCh <- nessusAPI.CreateScan{
-				UUID: "TestUUID",
-				Settings: nessusAPI.CreateScanSettings{
-					Name:        "Request 1",
-					Description: "Request 2",
-					FolderID:    "1",
-					ScannerID:   "2",
-					PolicyID:    "3",
-					TextTargets: "123.12.45.0/24",
-					Launch:      "ONETIME",
-					Enabled:     false,
-					LaunchNow:   false,
+			createScanCh <- ScanData{
+				CreateScanJSON: nessusAPI.CreateScan{
+					UUID: "TestUUID",
+					Settings: nessusAPI.CreateScanSettings{
+						Name:        "Request 1",
+						Description: "Request 2",
+						FolderID:    "1",
+						ScannerID:   "2",
+						PolicyID:    "3",
+						TextTargets: "123.12.45.0/24",
+						Launch:      "ONETIME",
+						Enabled:     false,
+						LaunchNow:   false,
+					},
 				},
 			}
 		}
@@ -126,9 +129,9 @@ func TestCreateScanJSON(t *testing.T) {
 	}(createScanCh)
 
 	createScanResponseCh := creator.createScan(createScanCh)
-	for createdScanResponse := range createScanResponseCh {
-		if createdScanResponse.Scan.UUID != "template-9f6a69d0-709e-22b1-f696-e1de009f6a8faf787b8b14d3a111" ||
-			createdScanResponse.Scan.Name != "Example Scan" {
+	for createdScanResponseData := range createScanResponseCh {
+		if createdScanResponseData.CreatedScan.Scan.UUID != "template-9f6a69d0-709e-22b1-f696-e1de009f6a8faf787b8b14d3a111" ||
+			createdScanResponseData.CreatedScan.Scan.Name != "Example Scan" {
 			t.FailNow()
 		}
 	}
@@ -136,17 +139,19 @@ func TestCreateScanJSON(t *testing.T) {
 
 func TestBuildCreateScanJSON(t *testing.T) {
 	creator := Creator{}
-	requestScanCh := make(chan RequestedScan)
+	requestScanCh := make(chan ScanData)
 
-	go func(requestScanCh chan RequestedScan) {
+	go func(requestScanCh chan ScanData) {
 		for i := 0; i < 5; i++ {
-			requestScanCh <- RequestedScan{
-				RequestID: "123",
-				Method:    "atomic",
-				TargetIPs: []string{
-					"192.168.2.0/24",
-					"192.168.3.0/24",
-					"192.168.4.0/24",
+			requestScanCh <- ScanData{
+				RequestedScan: RequestedScan{
+					RequestID: "123",
+					Method:    "atomic",
+					TargetIPs: []string{
+						"192.168.2.0/24",
+						"192.168.3.0/24",
+						"192.168.4.0/24",
+					},
 				},
 			}
 		}
@@ -155,19 +160,19 @@ func TestBuildCreateScanJSON(t *testing.T) {
 	}(requestScanCh)
 
 	createScanCh := creator.buildCreateScanJSON(requestScanCh)
-	for createScanJSON := range createScanCh {
-		if createScanJSON.UUID != "ab4bacd2-05f6-425c-9d79-3ba3940ad1c24e51e1f403febe40" ||
-			createScanJSON.Settings.Name != "Scan Request #123, Method: atomic" ||
-			createScanJSON.Settings.Description != "Scan Request #123, Method: atomic" ||
-			createScanJSON.Settings.FolderID != "65" ||
-			createScanJSON.Settings.ScannerID != "1" ||
-			createScanJSON.Settings.PolicyID != "54" ||
-			createScanJSON.Settings.TextTargets != "192.168.2.0/24 192.168.3.0/24 192.168.4.0/24" ||
-			createScanJSON.Settings.FileTargets != "" ||
-			createScanJSON.Settings.Launch != "ONETIME" ||
-			createScanJSON.Settings.Enabled != false ||
-			createScanJSON.Settings.LaunchNow != false ||
-			createScanJSON.Settings.Emails != "" {
+	for createScanJSONData := range createScanCh {
+		if createScanJSONData.CreateScanJSON.UUID != "ab4bacd2-05f6-425c-9d79-3ba3940ad1c24e51e1f403febe40" ||
+			createScanJSONData.CreateScanJSON.Settings.Name != "Scan Request #123, Method: atomic" ||
+			createScanJSONData.CreateScanJSON.Settings.Description != "Scan Request #123, Method: atomic" ||
+			createScanJSONData.CreateScanJSON.Settings.FolderID != "65" ||
+			createScanJSONData.CreateScanJSON.Settings.ScannerID != "1" ||
+			createScanJSONData.CreateScanJSON.Settings.PolicyID != "54" ||
+			createScanJSONData.CreateScanJSON.Settings.TextTargets != "192.168.2.0/24 192.168.3.0/24 192.168.4.0/24" ||
+			createScanJSONData.CreateScanJSON.Settings.FileTargets != "" ||
+			createScanJSONData.CreateScanJSON.Settings.Launch != "ONETIME" ||
+			createScanJSONData.CreateScanJSON.Settings.Enabled != false ||
+			createScanJSONData.CreateScanJSON.Settings.LaunchNow != false ||
+			createScanJSONData.CreateScanJSON.Settings.Emails != "" {
 			t.FailNow()
 		}
 	}

@@ -10,7 +10,7 @@ func TestNewCreator(t *testing.T) {
 	debug := false
 	client := nessusAPI.NewUsernameClient("localhost", "8834", "testU", "testP", debug)
 	httpClient := &http.Client{}
-	creator := NewCreator("/test/path", client, httpClient, debug)
+	creator := NewCreator("/test/path", client, httpClient, nil, debug)
 
 	if creator.debug != false ||
 		creator.apiClient != client ||

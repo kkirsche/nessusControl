@@ -18,10 +18,10 @@ func TestProcessRequestedScanDirectory(t *testing.T) {
 		t.FailNow()
 	}
 
-	for requestedScan := range requestedScanCh {
-		if requestedScan.RequestID != "123" ||
-			requestedScan.Method != "atomic" ||
-			requestedScan.TargetIPs[0] != "192.168.2.0/24" {
+	for requestedScanData := range requestedScanCh {
+		if requestedScanData.RequestedScan.RequestID != "123" ||
+			requestedScanData.RequestedScan.Method != "atomic" ||
+			requestedScanData.RequestedScan.TargetIPs[0] != "192.168.2.0/24" {
 			t.FailNow()
 		}
 	}

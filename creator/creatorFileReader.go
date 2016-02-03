@@ -13,10 +13,10 @@ import (
 )
 
 // processRequestedScanDirectory is used to process all files in a directory to find
-func (c *Creator) processRequestedScanDirectory(directoryPath string, moveFiles bool) (chan RequestedScan, error) {
+func (c *Creator) processRequestedScanDirectory(directoryPath string, moveFiles bool) (chan ScanData, error) {
 	c.debugln("processRequestedScanDirectory(): Creating response channel")
 	var wg sync.WaitGroup
-	requestedScanCh := make(chan RequestedScan)
+	requestedScanCh := make(chan ScanData)
 	c.debugln("processRequestedScanDirectory(): Determining files in the given directory")
 	fileArray, err := filepath.Glob(directoryPath + "/*.*")
 	if err != nil {
@@ -33,7 +33,7 @@ func (c *Creator) processRequestedScanDirectory(directoryPath string, moveFiles 
 	for _, pathToFile := range fileArray {
 		c.debugln("processRequestedScanDirectory(): Starting to process " + pathToFile)
 		wg.Add(1)
-		go func(wg *sync.WaitGroup, c *Creator, pathToFile string, requestedScanCh chan RequestedScan) {
+		go func(wg *sync.WaitGroup, c *Creator, pathToFile string, requestedScanCh chan ScanData) {
 			fileName := filename(pathToFile)
 			if moveFiles {
 				c.debugln("processRequestedScanDirectory(): Copying file to archive")
@@ -53,7 +53,7 @@ func (c *Creator) processRequestedScanDirectory(directoryPath string, moveFiles 
 					c.debugln("processRequestedScanDirectory(): Error while parsing " + newFilePath)
 				} else {
 					c.debugln("processRequestedScanDirectory(): Requested scan #" + requestedScan.RequestID + " found.")
-					requestedScanCh <- requestedScan
+					requestedScanCh <- ScanData{RequestedScan: requestedScan}
 					c.debugln("processRequestedScanDirectory(): Deleting file from temporary location.")
 					os.Remove(newFilePath)
 				}
@@ -64,7 +64,7 @@ func (c *Creator) processRequestedScanDirectory(directoryPath string, moveFiles 
 					c.debugln("processRequestedScanDirectory(): Error while parsing " + pathToFile)
 				} else {
 					c.debugln("processRequestedScanDirectory(): Requested scan #" + requestedScan.RequestID + " found.")
-					requestedScanCh <- requestedScan
+					requestedScanCh <- ScanData{RequestedScan: requestedScan}
 					c.debugln("processRequestedScanDirectory(): Moving file to archive.")
 				}
 			}
@@ -72,7 +72,7 @@ func (c *Creator) processRequestedScanDirectory(directoryPath string, moveFiles 
 		}(&wg, c, pathToFile, requestedScanCh)
 	}
 
-	go func(wg *sync.WaitGroup, requestedScanCh chan RequestedScan) {
+	go func(wg *sync.WaitGroup, requestedScanCh chan ScanData) {
 		wg.Wait()
 		c.debugln("processRequestedScanDirectory(): Closing output channel")
 		close(requestedScanCh)

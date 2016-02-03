@@ -1,6 +1,7 @@
 package nessusCreator
 
 import (
+	"database/sql"
 	"github.com/kkirsche/nessusControl/api" // nessusAPI is not used
 	"net/http"
 )
@@ -11,6 +12,7 @@ type Creator struct {
 	fileLocations fileLocations
 	apiClient     *nessusAPI.Client
 	httpClient    *http.Client
+	sqliteDB      *sql.DB
 	debug         bool
 }
 

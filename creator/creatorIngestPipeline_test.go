@@ -22,7 +22,7 @@ func TestIngestPipeline(t *testing.T) {
 		t.FailNow()
 	}
 
-	creator := NewCreator(pwd+"/test/fixtures", apiClient, httpClient, debugEnabled)
+	creator := NewCreator(pwd+"/test/fixtures", apiClient, httpClient, nil, debugEnabled)
 	err = creator.IngestPipeline(moveFilesDuringPipeline)
 	if err != nil {
 		t.FailNow()

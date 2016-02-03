@@ -1,6 +1,7 @@
 package nessusCreator
 
 import (
+	"database/sql"
 	"fmt"
 	"github.com/kkirsche/nessusControl/api" // nessusAPI is not used
 	"net/http"
@@ -9,7 +10,7 @@ import (
 
 // NewCreator creates a new Nessus Creator object for use in creating an
 // automated scan pipeline
-func NewCreator(baseDirectory string, client *nessusAPI.Client, httpClient *http.Client, debug bool) *Creator {
+func NewCreator(baseDirectory string, client *nessusAPI.Client, httpClient *http.Client, sqliteDB *sql.DB, debug bool) *Creator {
 	return &Creator{
 		apiClient:  client,
 		debug:      debug,
