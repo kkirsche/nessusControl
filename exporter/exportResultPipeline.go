@@ -1,11 +1,17 @@
+// Package nessusExporter is used to export results from Nessus when they are
+// ready.
 package nessusExporter
 
 import (
 	"fmt"
 	"io/ioutil"
 	"sync"
+	"time"
 )
 
+// ExportResultPipeline is used to check the SQLite database for running scans,
+// and begin querying Nessus to find out if a scan is ready to be downloaded to
+// the local machine for processing.
 func (e *Exporter) ExportResultPipeline() error {
 	rows, err := e.sqliteDB.Query("SELECT * FROM active_scans ORDER BY request_id DESC;")
 	if err != nil {
@@ -33,7 +39,10 @@ func (e *Exporter) ExportResultPipeline() error {
 
 				if status.Status == "ready" {
 					readyToExport = true
+					continue
 				}
+
+				time.Sleep(1000)
 			}
 
 			scanResults, err := e.apiClient.DownloadScan(e.httpClient, launchedScanRow.scanID, exportedFileResponse.File)
