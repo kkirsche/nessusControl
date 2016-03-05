@@ -38,9 +38,14 @@ var ingestCmd = &cobra.Command{
 		httpClient := &http.Client{Transport: transport}
 		debugEnabled := false
 		moveFilesDuringPipeline := false
-		apiClient := nessusAPI.NewAccessTokenClient(viper.GetString("nessusLocation.hostname"),
+		apiClient := nessusAPI.NewUsernameClient(viper.GetString("nessusLocation.hostname"),
 			viper.GetString("nessusLocation.port"), viper.GetString("auth.username"),
 			viper.GetString("auth.password"), viper.GetBool("debug"))
+
+		apiClient, err := apiClient.CreateSession(httpClient)
+		if err != nil {
+			log.Fatal(err.Error())
+		}
 
 		nessusDB, err := nessusDatabase.ConnectToSQLite(viper.GetString("sqlitePath"))
 		if err != nil {
