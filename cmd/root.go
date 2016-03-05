@@ -53,7 +53,22 @@ func init() {
 	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.nessusControl.yaml)")
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
-	RootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	RootCmd.PersistentFlags().StringP("username", "u", "admin", "The username to log into Nessus.")
+	RootCmd.PersistentFlags().StringP("password", "a", "Th1sSh0u1dB3AStr0ngP422w0rd", "The password to use to log into Nessus.")
+	RootCmd.PersistentFlags().StringP("hostname", "o", "127.0.0.1", "The host where Nessus is located.")
+	RootCmd.PersistentFlags().StringP("port", "p", "8834", "The port number used to connect to Nessus.")
+	RootCmd.PersistentFlags().BoolP("debug", "d", false, "Use this flag to enable debug mode")
+
+	viper.BindPFlag("auth.username", RootCmd.PersistentFlags().Lookup("username"))
+	viper.SetDefault("auth.username", "admin")
+	viper.BindPFlag("auth.password", RootCmd.PersistentFlags().Lookup("password"))
+	viper.SetDefault("auth.password", "Th1sSh0u1dB3AStr0ngP422w0rd")
+	viper.BindPFlag("nessusLocation.hostname", RootCmd.PersistentFlags().Lookup("hostname"))
+	viper.SetDefault("nessusLocation.hostname", "127.0.0.1")
+	viper.BindPFlag("nessusLocation.port", RootCmd.PersistentFlags().Lookup("port"))
+	viper.SetDefault("nessusLocation.port", "8834")
+	viper.BindPFlag("debug", RootCmd.PersistentFlags().Lookup("debug"))
+	viper.SetDefault("debug", "8834")
 }
 
 // initConfig reads in config file and ENV variables if set.
