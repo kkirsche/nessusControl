@@ -15,36 +15,61 @@
 package cmd
 
 import (
-	"fmt"
-
+	"crypto/tls"
+	"github.com/kkirsche/nessusControl/api"
+	"github.com/kkirsche/nessusControl/creator"
+	"github.com/kkirsche/nessusControl/database"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+	"log"
+	"net/http"
+	"os/user"
 )
 
 // ingestCmd represents the ingest command
 var ingestCmd = &cobra.Command{
 	Use:   "ingest",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Begin the ingest pipeline for Nessus",
+	Long:  `Begins running the ingest pipeline within .`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// TODO: Work your own magic here
-		fmt.Println("ingest called")
+		transport := &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		}
+		httpClient := &http.Client{Transport: transport}
+		debugEnabled := false
+		moveFilesDuringPipeline := false
+		apiClient := nessusAPI.NewAccessTokenClient(viper.GetString("nessusLocation.hostname"),
+			viper.GetString("nessusLocation.port"), viper.GetString("auth.username"),
+			viper.GetString("auth.password"), viper.GetBool("debug"))
+
+		nessusDB, err := nessusDatabase.ConnectToSQLite(viper.GetString("sqlitePath"))
+		if err != nil {
+			log.Fatal(err.Error())
+		}
+
+		creator := nessusCreator.NewCreator(viper.GetString("incomingFilesPath"), apiClient, httpClient, nessusDB, debugEnabled)
+		err = creator.IngestPipeline(moveFilesDuringPipeline)
+		if err != nil {
+			log.Fatal(err.Error())
+		}
 	},
 }
 
 func init() {
 	RootCmd.AddCommand(ingestCmd)
+	usr, _ := user.Current()
 
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	// ingestCmd.PersistentFlags().String("foo", "", "A help for foo")
+	ingestCmd.PersistentFlags().StringP("sqlitePath", "s", usr.HomeDir+"/nessusIncoming", "The path to the Nessus SQLite database.")
+	viper.BindPFlag("sqlitePath", ingestCmd.PersistentFlags().Lookup("sqlitePath"))
+	viper.SetDefault("sqlitePath", usr.HomeDir+"/nessusControl.db")
 
+	ingestCmd.PersistentFlags().StringP("requestedScansPath", "i", usr.HomeDir+"/nessusRequestedScans", "The path to the Nessus request scan files.")
+	viper.BindPFlag("requestedScansPath", ingestCmd.PersistentFlags().Lookup("requestedScansPath"))
+	viper.SetDefault("requestedScansPath", usr.HomeDir+"/nessusRequestedScans")
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// ingestCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
