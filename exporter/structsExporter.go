@@ -12,6 +12,7 @@ type Exporter struct {
 	sqliteDB      *sql.DB
 	httpClient    *http.Client
 	fileLocations fileLocations
+	debug         bool
 }
 
 type fileLocations struct {
