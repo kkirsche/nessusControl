@@ -22,7 +22,12 @@ func (c *Creator) saveLaunchedScan(launchedScanCh chan ScanData) error {
 
 	for launchedScanData := range launchedScanCh {
 		c.debugln("Saving scan data for requested scan #" + launchedScanData.RequestedScan.RequestID)
-		_, err = c.sqliteDB.Exec("INSERT INTO active_scans (request_id, method, scan_uuid, scan_starttime) VALUES ($a, $b, $c, $d)", "this", launchedScanData.RequestedScan.RequestID, launchedScanData.RequestedScan.Method, launchedScanData.LaunchedScan.ScanUUID, launchedScanData.ScanStartTime)
+		_, err = c.sqliteDB.Exec("INSERT INTO active_scans (request_id, method, scan_uuid, scan_id, scan_starttime) VALUES ($a, $b, $c, $d, $e)",
+			launchedScanData.RequestedScan.RequestID,
+			launchedScanData.RequestedScan.Method,
+			launchedScanData.LaunchedScan.ScanUUID,
+			launchedScanData.CreatedScan.Scan.ID,
+			launchedScanData.ScanStartTime)
 		if err != nil {
 			return err
 		}
