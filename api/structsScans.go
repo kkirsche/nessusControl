@@ -81,31 +81,31 @@ type ScanDetails struct {
 		ReadableName string   `json:"readable_name"`
 	} `json:"filters"`
 	History []struct {
-		AltTargetsUsed       bool   `json:"alt_targets_used"`
-		CreationDate         int    `json:"creation_date"`
-		HistoryID            int    `json:"history_id"`
-		LastModificationDate int    `json:"last_modification_date"`
-		OwnerID              int    `json:"owner_id"`
-		Scheduler            int    `json:"scheduler"`
-		Status               string `json:"status"`
-		Type                 string `json:"type"`
-		UUID                 string `json:"uuid"`
+		AltTargetsUsed       bool        `json:"alt_targets_used"`
+		CreationDate         interface{} `json:"creation_date"`
+		HistoryID            interface{} `json:"history_id"`
+		LastModificationDate interface{} `json:"last_modification_date"`
+		OwnerID              interface{} `json:"owner_id"`
+		Scheduler            interface{} `json:"scheduler"`
+		Status               string      `json:"status"`
+		Type                 string      `json:"type"`
+		UUID                 string      `json:"uuid"`
 	} `json:"history"`
 	Hosts []struct {
-		Critical            int    `json:"critical"`
-		High                int    `json:"high"`
-		HostID              int    `json:"host_id"`
-		HostIndex           int    `json:"host_index"`
-		Hostname            string `json:"hostname"`
-		Info                int    `json:"info"`
-		Low                 int    `json:"low"`
-		Medium              int    `json:"medium"`
-		Numchecksconsidered int    `json:"numchecksconsidered"`
-		Progress            string `json:"progress"`
-		Scanprogresscurrent int    `json:"scanprogresscurrent"`
-		Scanprogresstotal   int    `json:"scanprogresstotal"`
-		Score               int    `json:"score"`
-		Severity            int    `json:"severity"`
+		Critical            int         `json:"critical"`
+		High                int         `json:"high"`
+		HostID              int         `json:"host_id"`
+		HostIndex           int         `json:"host_index"`
+		Hostname            string      `json:"hostname"`
+		Info                int         `json:"info"`
+		Low                 int         `json:"low"`
+		Medium              int         `json:"medium"`
+		Numchecksconsidered int         `json:"numchecksconsidered"`
+		Progress            string      `json:"progress"`
+		Scanprogresscurrent interface{} `json:"scanprogresscurrent"`
+		Scanprogresstotal   interface{} `json:"scanprogresstotal"`
+		Score               interface{} `json:"score"`
+		Severity            interface{} `json:"severity"`
 		Severitycount       struct {
 			Item []struct {
 				Count         int `json:"count"`
@@ -120,54 +120,54 @@ type ScanDetails struct {
 			ID          interface{} `json:"id"`
 			Name        interface{} `json:"name"`
 			Owner       interface{} `json:"owner"`
-			Permissions int         `json:"permissions"`
+			Permissions interface{} `json:"permissions"`
 			Type        string      `json:"type"`
 		} `json:"acls"`
 		AltTargetsUsed  interface{} `json:"alt_targets_used"`
 		Control         bool        `json:"control"`
 		EditAllowed     bool        `json:"edit_allowed"`
-		FolderID        int         `json:"folder_id"`
+		FolderID        interface{} `json:"folder_id"`
 		Hasaudittrail   bool        `json:"hasaudittrail"`
 		Haskb           bool        `json:"haskb"`
-		Hostcount       int         `json:"hostcount"`
+		Hostcount       interface{} `json:"hostcount"`
 		Name            string      `json:"name"`
 		NoTarget        interface{} `json:"no_target"`
-		ObjectID        int         `json:"object_id"`
+		ObjectID        interface{} `json:"object_id"`
 		PCICanUpload    bool        `json:"pci-can-upload"`
 		Policy          string      `json:"policy"`
-		ScanEnd         int         `json:"scan_end"`
-		ScanStart       int         `json:"scan_start"`
+		ScanEnd         interface{} `json:"scan_end"`
+		ScanStart       interface{} `json:"scan_start"`
 		ScanType        string      `json:"scan_type"`
-		ScannerEnd      int         `json:"scanner_end"`
+		ScannerEnd      interface{} `json:"scanner_end"`
 		ScannerName     string      `json:"scanner_name"`
-		ScannerStart    int         `json:"scanner_start"`
+		ScannerStart    interface{} `json:"scanner_start"`
 		Status          string      `json:"status"`
 		Targets         string      `json:"targets"`
-		Timestamp       int         `json:"timestamp"`
-		UserPermissions int         `json:"user_permissions"`
+		Timestamp       interface{} `json:"timestamp"`
+		UserPermissions interface{} `json:"user_permissions"`
 		UUID            string      `json:"uuid"`
 	} `json:"info"`
 	Notes        interface{} `json:"notes"`
 	Remediations struct {
-		NumCves           int `json:"num_cves"`
-		NumHosts          int `json:"num_hosts"`
-		NumImpactedHosts  int `json:"num_impacted_hosts"`
-		NumRemediatedCves int `json:"num_remediated_cves"`
+		NumCves           interface{} `json:"num_cves"`
+		NumHosts          interface{} `json:"num_hosts"`
+		NumImpactedHosts  interface{} `json:"num_impacted_hosts"`
+		NumRemediatedCves interface{} `json:"num_remediated_cves"`
 		Remediations      []struct {
-			Hosts       int    `json:"hosts"`
-			Remediation string `json:"remediation"`
-			Value       string `json:"value"`
-			Vulns       int    `json:"vulns"`
+			Hosts       interface{} `json:"hosts"`
+			Remediation string      `json:"remediation"`
+			Value       string      `json:"value"`
+			Vulns       interface{} `json:"vulns"`
 		} `json:"remediations"`
 	} `json:"remediations"`
 	Vulnerabilities []struct {
-		Count         int    `json:"count"`
-		PluginFamily  string `json:"plugin_family"`
-		PluginID      int    `json:"plugin_id"`
-		PluginName    string `json:"plugin_name"`
-		Severity      int    `json:"severity"`
-		SeverityIndex int    `json:"severity_index"`
-		VulnIndex     int    `json:"vuln_index"`
+		Count         interface{} `json:"count"`
+		PluginFamily  string      `json:"plugin_family"`
+		PluginID      interface{} `json:"plugin_id"`
+		PluginName    string      `json:"plugin_name"`
+		Severity      interface{} `json:"severity"`
+		SeverityIndex interface{} `json:"severity_index"`
+		VulnIndex     interface{} `json:"vuln_index"`
 	} `json:"vulnerabilities"`
 }
 
