@@ -26,57 +26,58 @@ func (e *Exporter) ExportResultPipeline() error {
 		wg.Add(1)
 		var launchedScanRow launchedScanDBRow
 		rows.Scan(&launchedScanRow.requestID, &launchedScanRow.method, &launchedScanRow.scanUUID, &launchedScanRow.scanID, &launchedScanRow.scanStartTime)
-		details, err := e.apiClient.ScanDetails(e.httpClient, launchedScanRow.scanID)
-		if err != nil {
-			fmt.Print("Scan Details")
-			return err
-		}
-
-		for details.Info.Status == "running" {
-			time.Sleep(10000)
-			details, err = e.apiClient.ScanDetails(e.httpClient, launchedScanRow.scanID)
+		go func(wg *sync.WaitGroup, e *Exporter, launchedScanRow launchedScanDBRow, requestIDs []int) {
+			details, err := e.apiClient.ScanDetails(e.httpClient, launchedScanRow.scanID)
 			if err != nil {
-				fmt.Print("Scan Details")
-				return err
+				wg.Done()
+				return
 			}
-		}
 
-		exportedFileResponse, err := e.apiClient.ExportScan(e.httpClient, launchedScanRow.scanID, `{"format":"csv"}`)
-		if err != nil {
-			fmt.Print("Export Scan")
-			return err
-		}
+			for details.Info.Status == "running" {
+				time.Sleep(10000)
+				details, err = e.apiClient.ScanDetails(e.httpClient, launchedScanRow.scanID)
+				if err != nil {
+					wg.Done()
+					return
+				}
+			}
 
-		readyToExport := false
-		for readyToExport {
-			status, err := e.apiClient.ScanExportStatus(e.httpClient, launchedScanRow.scanID, exportedFileResponse.File)
+			exportedFileResponse, err := e.apiClient.ExportScan(e.httpClient, launchedScanRow.scanID, `{"format":"csv"}`)
 			if err != nil {
-				fmt.Print("Export Scan Status")
-				return err
+				wg.Done()
+				return
 			}
 
-			if status.Status == "ready" {
-				readyToExport = true
-				continue
+			readyToExport := false
+			for readyToExport {
+				status, err := e.apiClient.ScanExportStatus(e.httpClient, launchedScanRow.scanID, exportedFileResponse.File)
+				if err != nil {
+					wg.Done()
+					return
+				}
+
+				if status.Status == "ready" {
+					readyToExport = true
+					continue
+				}
+
+				time.Sleep(10000)
 			}
 
-			time.Sleep(10000)
-		}
-
-		scanResults, err := e.apiClient.DownloadScan(e.httpClient, launchedScanRow.scanID, exportedFileResponse.File)
-		if err != nil {
-			fmt.Print("Download Scan")
-			return err
-		}
-		filename := fmt.Sprintf("Scanner_%s-RequestID_%d-Method_%s-ScanId_%d-Time_%s.csv", getLocalIPAddress(), launchedScanRow.requestID, launchedScanRow.method, launchedScanRow.scanID, launchedScanRow.scanStartTime)
-		filepath := fmt.Sprintf("%s/%s", e.fileLocations.resultsDirectory, filename)
-		err = ioutil.WriteFile(filepath, []byte(scanResults), 0644)
-		if err != nil {
-			fmt.Print("Write the file")
-			return err
-		}
-		requestIDs = append(requestIDs, launchedScanRow.scanID)
-		wg.Done()
+			scanResults, err := e.apiClient.DownloadScan(e.httpClient, launchedScanRow.scanID, exportedFileResponse.File)
+			if err != nil {
+				return
+			}
+			filename := fmt.Sprintf("Scanner_%s-RequestID_%d-Method_%s-ScanId_%d-Time_%s.csv", getLocalIPAddress(), launchedScanRow.requestID, launchedScanRow.method, launchedScanRow.scanID, launchedScanRow.scanStartTime)
+			filepath := fmt.Sprintf("%s/%s", e.fileLocations.resultsDirectory, filename)
+			err = ioutil.WriteFile(filepath, []byte(scanResults), 0644)
+			if err != nil {
+				wg.Done()
+				return
+			}
+			requestIDs = append(requestIDs, launchedScanRow.scanID)
+			wg.Done()
+		}(wg, e, launchedScanRow, requestIDs)
 	}
 
 	if err := rows.Err(); err != nil {
