@@ -1,4 +1,4 @@
-// Copyright © 2016 Kevin Kirsche <kevin.kirsche@verizon.com> <kev.kirsche@gmail.com>
+// Copyright © 2016 Kevin Kirsche <kev.kirsche@gmail.com>
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
