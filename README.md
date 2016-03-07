@@ -4,3 +4,6 @@
 Golang Nessus Control Client.
 
 This package package is to be used to automate a Nessus based scanning infrastructure.
+
+## Configuration
+An example configuration file is included. It is named `nessusControl.yml`
