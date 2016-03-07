@@ -36,12 +36,13 @@ to quickly create a Cobra application.`,
 		scanners := viper.GetStringSlice("transport.scanners")
 
 		for _, scanner := range scanners {
-			transporter := nessusTransporter.NewTransporter(
-				nessusTransporter.NewSSHKey(viper.GetString("transport.key.basepath"), viper.GetString("transport.key.filename."+scanner)),
-				nessusTransporter.NewSSHAuth(viper.GetString("transport.auth."+scanner+".username"), viper.GetString("transport.auth."+scanner+".password")),
-				nessusTransporter.NewTargetHost(viper.GetString("transport.connectionInfo."+scanner+".host"), viper.GetString("transport.connectionInfo."+scanner+".port")),
-				viper.GetBool("transport.auth."+scanner+".withSSHAgent"))
+			transportBase := "transport." + scanner
+			sshKey := nessusTransporter.NewSSHKey(viper.GetString(transportBase+".key.basepath"), viper.GetString(transportBase+".key.filename"))
+			sshAuth := nessusTransporter.NewSSHAuth(viper.GetString(transportBase+".auth.username"), viper.GetString(transportBase+".auth.password"))
+			targetHost := nessusTransporter.NewTargetHost(viper.GetString(transportBase+".address.host"), viper.GetString(transportBase+".address.port"))
+			withSSHAgent := viper.GetBool(transportBase + ".withSSHAgent")
 
+			transporter := nessusTransporter.NewTransporter(sshKey, sshAuth, targetHost, withSSHAgent)
 			err := transporter.Connect()
 			if err != nil {
 				log.Fatal(err)
