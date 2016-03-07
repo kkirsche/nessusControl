@@ -15,35 +15,71 @@
 package cmd
 
 import (
-	"fmt"
+	"crypto/tls"
+	"log"
+	"net/http"
+	"os/user"
 
+	"github.com/kkirsche/nessusControl/api"
+	"github.com/kkirsche/nessusControl/database"
+	"github.com/kkirsche/nessusControl/exporter"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 // exportCmd represents the export command
 var exportCmd = &cobra.Command{
 	Use:   "export",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Begin the export results pipeline for Nessus",
+	Long: `Begins running the export results pipeline to retrieve scan results
+from Nessus scans.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// TODO: Work your own magic here
-		fmt.Println("export called")
+		transport := &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		}
+		httpClient := &http.Client{Transport: transport}
+		debugEnabled := false
+		apiClient := nessusAPI.NewUsernameClient(viper.GetString("nessusLocation.hostname"),
+			viper.GetString("nessusLocation.port"), viper.GetString("auth.username"),
+			viper.GetString("auth.password"), viper.GetBool("debug"))
+
+		apiClient, err := apiClient.CreateSession(httpClient)
+		if err != nil {
+			log.Fatal(err.Error())
+		}
+
+		nessusDB, err := nessusDatabase.ConnectToSQLite(viper.GetString("sqlitePath"))
+		if err != nil {
+			log.Fatal(err.Error())
+		}
+
+		fileLocations := nessusExporter.NewFileLocations(viper.GetString("directories.base"),
+			viper.GetString("directories.results"))
+
+		exporter := nessusExporter.NewExporter(apiClient, httpClient, nessusDB, fileLocations, debugEnabled)
+		err = exporter.ExportResultPipeline()
+		if err != nil {
+			log.Fatal(err.Error())
+		}
 	},
 }
 
 func init() {
 	RootCmd.AddCommand(exportCmd)
+	usr, _ := user.Current()
 
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	// exportCmd.PersistentFlags().String("foo", "", "A help for foo")
+	exportCmd.PersistentFlags().StringP("basepath", "b", usr.HomeDir, "The base path to the results directory")
+	exportCmd.PersistentFlags().StringP("resultspath", "r", "/nessusResults", "The relative path to the results directory from the base directory")
+
+	viper.BindPFlag("directories.base", exportCmd.PersistentFlags().Lookup("basepath"))
+	viper.BindPFlag("directories.results", exportCmd.PersistentFlags().Lookup("resultspath"))
+
+	viper.SetDefault("directories.base", usr.HomeDir)
+	viper.SetDefault("directories.results", "/nessusResults")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
