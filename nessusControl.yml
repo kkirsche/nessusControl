@@ -25,3 +25,22 @@ transport:
       filename: "id_rsa"
     withSSHAgent: false
     removeResultFiles: true
+resultsProcessor:
+  criteriaBasedViolations:
+    externallyAccessible:
+      positivePolicyViolations: []
+      negativePolicyViolations: []
+    organizationAndRegionMatch:
+      positivePolicyViolations: []
+      negativePolicyViolations: []
+    port:
+      # PluginID|^|Port
+      positivePolicyViolations: []
+      negativePolicyViolations: []
+    descriptionRegexp:
+      # PluginID|^|Regular Expression
+      positivePolicyViolations: []
+      negativePolicyViolations: []
+  general:
+    positivePolicyViolations: []
+    negativePolicyViolations: []
