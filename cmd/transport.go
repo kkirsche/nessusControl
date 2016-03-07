@@ -47,6 +47,12 @@ to quickly create a Cobra application.`,
 			if err != nil {
 				log.Fatal(err)
 			}
+
+			err = transporter.RetrieveResultFiles(viper.GetString(transportBase+".resultPath"),
+				viper.GetString("directories.base")+viper.GetString("directories.results"))
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
 	},
 }
