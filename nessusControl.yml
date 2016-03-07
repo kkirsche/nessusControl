@@ -24,3 +24,4 @@ transport:
       basepath: "/Users/exampleUser/.ssh/"
       filename: "id_rsa"
     withSSHAgent: false
+    removeResultFiles: true

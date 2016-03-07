@@ -2,12 +2,13 @@ package nessusTransporter
 
 // NewTransporter returns an instance of the Transporter structure
 func NewTransporter(sshKey SSHKey, auth SSHAuth, targetHost TargetHost,
-	withSSHAgent bool) *Transporter {
+	withSSHAgent, debug bool) *Transporter {
 	return &Transporter{
 		SSHKey:       sshKey,
 		SSHAuth:      auth,
 		TargetHost:   targetHost,
 		WithSSHAgent: withSSHAgent,
+		debug:        debug,
 	}
 }
 

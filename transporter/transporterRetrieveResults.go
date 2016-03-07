@@ -1,6 +1,7 @@
 package nessusTransporter
 
 import (
+	"fmt"
 	"regexp"
 	"strings"
 
@@ -9,7 +10,11 @@ import (
 
 // RetrieveResultFiles retrieves files from a remote path and copies them to the
 // local machine
-func (t *Transporter) RetrieveResultFiles(remoteResultsPath, localResultsPath string) error {
+func (t *Transporter) RetrieveResultFiles(remoteResultsPath, localResultsPath string, removeFiles bool) error {
+	if t.debug {
+		fmt.Printf("Retrieving file listing from %s\n", remoteResultsPath)
+	}
+
 	resultFiles, err := goScp.ExecuteCommand(t.Client, "ls -1 "+remoteResultsPath)
 	if err != nil {
 		return err
@@ -30,10 +35,21 @@ func (t *Transporter) RetrieveResultFiles(remoteResultsPath, localResultsPath st
 	}
 
 	for _, file := range matches {
+		if t.debug {
+			fmt.Printf("Retrieving file with name %s\n", file)
+		}
+
 		err = goScp.CopyRemoteFileToLocal(t.Client, remoteResultsPath, file, localResultsPath, "")
 		if err != nil {
 			return err
 		}
+
+		remoteCommand := fmt.Sprintf("rm %s/%s", remoteResultsPath, file)
+		_, err = goScp.ExecuteCommand(t.Client, remoteCommand)
+		if err != nil {
+			return err
+		}
 	}
+
 	return nil
 }

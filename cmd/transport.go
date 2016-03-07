@@ -15,6 +15,7 @@
 package cmd
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/kkirsche/nessusControl/transporter"
@@ -25,31 +26,32 @@ import (
 // transportCmd represents the transport command
 var transportCmd = &cobra.Command{
 	Use:   "transport",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Transports remote files to the local machine",
+	Long: `Transport is used to transport Nessus result files on a scanner to the
+local machine, usually for further processing.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		scanners := viper.GetStringSlice("transport.scanners")
-
+		withDebug := viper.GetBool("debug")
 		for _, scanner := range scanners {
+			if withDebug {
+				fmt.Printf("Transporting files from %s\n", scanner)
+			}
+
 			transportBase := "transport." + scanner
 			sshKey := nessusTransporter.NewSSHKey(viper.GetString(transportBase+".key.basepath"), viper.GetString(transportBase+".key.filename"))
 			sshAuth := nessusTransporter.NewSSHAuth(viper.GetString(transportBase+".auth.username"), viper.GetString(transportBase+".auth.password"))
 			targetHost := nessusTransporter.NewTargetHost(viper.GetString(transportBase+".address.host"), viper.GetString(transportBase+".address.port"))
 			withSSHAgent := viper.GetBool(transportBase + ".withSSHAgent")
 
-			transporter := nessusTransporter.NewTransporter(sshKey, sshAuth, targetHost, withSSHAgent)
+			transporter := nessusTransporter.NewTransporter(sshKey, sshAuth, targetHost, withSSHAgent, withDebug)
 			err := transporter.Connect()
 			if err != nil {
 				log.Fatal(err)
 			}
 
 			err = transporter.RetrieveResultFiles(viper.GetString(transportBase+".resultPath"),
-				viper.GetString("directories.base")+viper.GetString("directories.results"))
+				viper.GetString("directories.base")+viper.GetString("directories.results"),
+				viper.GetBool(transportBase+"removeResultFiles"))
 			if err != nil {
 				log.Fatal(err)
 			}

@@ -11,6 +11,7 @@ type Transporter struct {
 	TargetHost   TargetHost
 	WithSSHAgent bool
 	Client       *ssh.Client
+	debug        bool
 }
 
 // SSHKey includes details necessary to locate SSH Keys used for a session.
