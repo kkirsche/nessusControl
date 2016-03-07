@@ -16,21 +16,23 @@ package cmd
 
 import (
 	"crypto/tls"
+	"log"
+	"net/http"
+	"os/user"
+
 	"github.com/kkirsche/nessusControl/api"
 	"github.com/kkirsche/nessusControl/creator"
 	"github.com/kkirsche/nessusControl/database"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"log"
-	"net/http"
-	"os/user"
 )
 
 // ingestCmd represents the ingest command
 var ingestCmd = &cobra.Command{
 	Use:   "ingest",
 	Short: "Begin the ingest pipeline for Nessus",
-	Long:  `Begins running the ingest pipeline within .`,
+	Long: `Begins running the ingest pipeline to create and launch new Nessus
+scans.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		transport := &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
@@ -52,7 +54,9 @@ var ingestCmd = &cobra.Command{
 			log.Fatal(err.Error())
 		}
 
-		creator := nessusCreator.NewCreator(viper.GetString("incomingFilesPath"), apiClient, httpClient, nessusDB, debugEnabled)
+		creator := nessusCreator.NewCreator(viper.GetString("directories.base")+
+			viper.GetString("directories.incoming"), apiClient, httpClient, nessusDB,
+			debugEnabled)
 		err = creator.IngestPipeline(moveFilesDuringPipeline)
 		if err != nil {
 			log.Fatal(err.Error())
@@ -72,9 +76,13 @@ func init() {
 	viper.BindPFlag("sqlitePath", ingestCmd.PersistentFlags().Lookup("sqlitePath"))
 	viper.SetDefault("sqlitePath", usr.HomeDir+"/nessusControl.db")
 
-	ingestCmd.PersistentFlags().StringP("requestedScansPath", "i", usr.HomeDir+"/nessusRequestedScans", "The path to the Nessus request scan files.")
-	viper.BindPFlag("requestedScansPath", ingestCmd.PersistentFlags().Lookup("requestedScansPath"))
-	viper.SetDefault("requestedScansPath", usr.HomeDir+"/nessusRequestedScans")
+	ingestCmd.PersistentFlags().StringP("basepath", "b", usr.HomeDir, "The path to the Nessus request scan files.")
+	viper.BindPFlag("directories.base", ingestCmd.PersistentFlags().Lookup("basepath"))
+	viper.SetDefault("directories.base", usr.HomeDir)
+
+	ingestCmd.PersistentFlags().StringP("requestedPath", "r", "/nessusRequestedScans", "The relative path to the Nessus request scan files from the base directory.")
+	viper.BindPFlag("directories.incoming", ingestCmd.PersistentFlags().Lookup("requestedPath"))
+	viper.SetDefault("directories.incoming", "/nessusRequestedScans")
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// ingestCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
