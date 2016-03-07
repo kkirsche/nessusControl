@@ -1,0 +1,28 @@
+---
+auth:
+  username: "exampleUser"
+  password: "examplePassword"
+nessusLocation:
+  hostname: "remoteMachine"
+  port: "8834"
+sqlitePath: "/Users/exampleUser/nessusControl.db"
+debug: false
+directories:
+  base: "/Users/exampleUser"
+  incoming: "/nessusRequestedScans"
+  results: "/nessusResults"
+transport:
+  scanners: ["scanner1Hostname"]
+  connectionInfo:
+    scanner1Hostname:
+      host: 127.0.0.1
+      port: 22
+  auth:
+    scanner1Hostname:
+      username: "exampleUserOnScanner1"
+      password: "Scanner1Password"
+      withSSHAgent: false
+  key:
+    basepath: "/Users/exampleUser/.ssh/"
+    filename:
+      scanner1Hostname: "id_rsa"
