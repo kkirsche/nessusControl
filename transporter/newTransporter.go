@@ -1,3 +1,5 @@
+// Package nessusTransporter is used to transport results from a remote Nessus host
+// to the local machine.
 package nessusTransporter
 
 // NewTransporter returns an instance of the Transporter structure
