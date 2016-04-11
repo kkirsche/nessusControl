@@ -23,7 +23,7 @@ var (
 		RegionID:       2,
 	}
 
-	anyMatchCriteria = &MatchCriteria{
+	positiveAnyMatchCriteria = &MatchCriteria{
 		PluginID:                     71783,
 		ExternallyAccessible:         true,
 		Port:                         []int{514, 123},
@@ -34,7 +34,7 @@ var (
 		CountIf: "any",
 	}
 
-	allMatchCriteria = &MatchCriteria{
+	positiveAllMatchCriteria = &MatchCriteria{
 		PluginID:                     71783,
 		ExternallyAccessible:         true,
 		Port:                         []int{514, 123},
@@ -45,7 +45,7 @@ var (
 		CountIf: "all",
 	}
 
-	ignoredAnyMatchCriteria = &MatchCriteria{
+	positiveIgnoredAnyMatchCriteria = &MatchCriteria{
 		PluginID:                     71783,
 		ExternallyAccessible:         true,
 		Port:                         []int{514, 123},
@@ -55,11 +55,85 @@ var (
 		IgnoreViolationsWithCriteria: true,
 		CountIf: "any",
 	}
+
+	negativeAnyMatchCriteria = &MatchCriteria{
+		PluginID:                     1234,
+		ExternallyAccessible:         false,
+		Port:                         []int{1},
+		DescriptionRegexp:            []string{"This is a lot of structs?", "This better not match"},
+		OrganizationID:               []int{6, 4, 2},
+		RegionID:                     []int{5, 3, 1},
+		IgnoreViolationsWithCriteria: false,
+		CountIf: "any",
+	}
+
+	negativeAllMatchCriteria = &MatchCriteria{
+		PluginID:                     1234,
+		ExternallyAccessible:         false,
+		Port:                         []int{1},
+		DescriptionRegexp:            []string{"This is a lot of structs?", "This better not match"},
+		OrganizationID:               []int{6, 4, 2},
+		RegionID:                     []int{5, 3, 1},
+		IgnoreViolationsWithCriteria: false,
+		CountIf: "all",
+	}
+
+	negativeIgnoredAnyMatchCriteria = &MatchCriteria{
+		PluginID:                     1234,
+		ExternallyAccessible:         false,
+		Port:                         []int{1},
+		DescriptionRegexp:            []string{"This is a lot of structs?", "This better not match"},
+		OrganizationID:               []int{6, 4, 2},
+		RegionID:                     []int{5, 3, 1},
+		IgnoreViolationsWithCriteria: true,
+		CountIf: "any",
+	}
 )
 
-func TestPositiveCheckForViolation(t *testing.T) {
-	violation := anyMatchCriteria.CheckForViolation(nessusResultRow)
+func TestPositiveAnyMatchCheckForViolation(t *testing.T) {
+	violation := positiveAnyMatchCriteria.CheckForViolation(nessusResultRow)
+
 	if !violation {
+		t.FailNow()
+	}
+}
+
+func TestNegativeAnyMatchCheckForViolation(t *testing.T) {
+	violation := negativeAnyMatchCriteria.CheckForViolation(nessusResultRow)
+
+	if violation {
+		t.FailNow()
+	}
+}
+
+func TestPositiveAllMatchCheckForViolation(t *testing.T) {
+	violation := positiveAllMatchCriteria.CheckForViolation(nessusResultRow)
+
+	if !violation {
+		t.FailNow()
+	}
+}
+
+func TestNegativeAllMatchCheckForViolation(t *testing.T) {
+	violation := negativeAllMatchCriteria.CheckForViolation(nessusResultRow)
+
+	if violation {
+		t.FailNow()
+	}
+}
+
+func TestPositiveIgnoredAnyMatchCheckForViolation(t *testing.T) {
+	violation := positiveIgnoredAnyMatchCriteria.CheckForViolation(nessusResultRow)
+
+	if violation {
+		t.FailNow()
+	}
+}
+
+func TestNegativeIgnoredAnyMatchCheckForViolation(t *testing.T) {
+	violation := negativeIgnoredAnyMatchCriteria.CheckForViolation(nessusResultRow)
+
+	if violation {
 		t.FailNow()
 	}
 }
