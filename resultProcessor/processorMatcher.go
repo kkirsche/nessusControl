@@ -4,7 +4,11 @@ import (
 	"regexp"
 )
 
-func intMatch(resultInt int, criteriaInts []int) []bool {
+func intMatch(a, b int) bool {
+	return a == b
+}
+
+func intSliceMatch(resultInt int, criteriaInts []int) []bool {
 	match := []bool{}
 
 	for _, criteriaInt := range criteriaInts {
@@ -16,7 +20,11 @@ func intMatch(resultInt int, criteriaInts []int) []bool {
 	return match
 }
 
-func stringMatch(resultString string, criteriaStrings []string) []bool {
+func stringMatch(a, b string) bool {
+	return a == b
+}
+
+func stringSliceMatch(resultString string, criteriaStrings []string) []bool {
 	match := []bool{}
 
 	for _, criteriaString := range criteriaStrings {
@@ -28,7 +36,7 @@ func stringMatch(resultString string, criteriaStrings []string) []bool {
 	return match
 }
 
-func regexpStringMatch(resultString string, regexpStrings []string) []bool {
+func regexpStringSliceMatch(resultString string, regexpStrings []string) []bool {
 	match := []bool{}
 
 	for _, regexpString := range regexpStrings {

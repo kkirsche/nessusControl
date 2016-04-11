@@ -1,4 +1,4 @@
-- policyViolations:
+policyViolations:
   - 81817:
     - externallyAccessible: true
     - port: [123, 321]
