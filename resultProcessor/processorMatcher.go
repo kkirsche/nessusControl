@@ -1,23 +1,40 @@
 package nessusProcessor
 
-func intMatch(resultInt int, criteriaInts []int) bool {
-	var match = false
+import (
+	"regexp"
+)
+
+func intMatch(resultInt int, criteriaInts []int) []bool {
+	match := []bool{}
 
 	for _, criteriaInt := range criteriaInts {
 		if resultInt == criteriaInt {
-			match = true
+			match = append(match, true)
 		}
 	}
 
 	return match
 }
 
-func stringMatch(resultString string, criteriaStrings []string) bool {
-	var match = false
+func stringMatch(resultString string, criteriaStrings []string) []bool {
+	match := []bool{}
 
 	for _, criteriaString := range criteriaStrings {
 		if resultString == criteriaString {
-			match = true
+			match = append(match, true)
+		}
+	}
+
+	return match
+}
+
+func regexpStringMatch(resultString string, regexpStrings []string) []bool {
+	match := []bool{}
+
+	for _, regexpString := range regexpStrings {
+		compiledRegexp := regexp.MustCompile(regexpString)
+		if compiledRegexp.FindStringIndex(resultString) != nil {
+			match = append(match, true)
 		}
 	}
 
