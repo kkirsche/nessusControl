@@ -1,0 +1,17 @@
+- policyViolations:
+  - 81817:
+    - externallyAccessible: true
+    - port: [123, 321]
+    - descriptionRegexp: ['(This|That) is a match!', '(This|That) doesnt match sadly.']
+    - organizationID: [1, 3]
+    - regionID: [1, 3]
+    - ignoreViolationWithCriteria: false
+    - countIf: all
+  - 81817:
+    - externallyAccessible: true
+    - port: [678, 876]
+    - descriptionRegexp: ['(This|That) is a match!', '(This|That) doesnt match sadly.']
+    - organizationID: [1, 3]
+    - regionID: [1, 3]
+    - ignoreViolationWithCriteria: true
+    - countIf: all
