@@ -3,12 +3,12 @@ package nessusProcessor
 // MatchCriteria holds what criteria should be checked when checking for a
 // policy violation.
 type MatchCriteria struct {
-	PluginID                     int
-	ExternallyAccessible         bool
-	Port                         []int
-	DescriptionRegexp            []string
-	OrganizationID               []int
-	RegionID                     []int
-	IgnoreViolationsWithCriteria bool
-	CountIf                      string
+	PluginID                         int
+	ExternallyAccessible             bool
+	Ports                            []int
+	DescriptionRegexps               []string
+	OrganizationIDs                  []int
+	RegionIDs                        []int
+	IgnoreViolationWithCriteriaMatch bool
+	CountIf                          string
 }

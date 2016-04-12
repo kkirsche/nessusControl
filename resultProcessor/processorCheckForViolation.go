@@ -10,23 +10,23 @@ func (m *MatchCriteria) CheckForViolation(r *Nessus6ResultRow) bool {
 
 	results = append(results, intMatch(r.PluginID, m.PluginID))
 
-	portMatches := intSliceMatch(r.Port, m.Port)
+	portMatches := intSliceMatch(r.Port, m.Ports)
 	results = append(results, checkMatchCriteria(portMatches, m.CountIf))
 
-	descriptionMatches := regexpStringSliceMatch(r.Description, m.DescriptionRegexp)
+	descriptionMatches := regexpStringSliceMatch(r.Description, m.DescriptionRegexps)
 	results = append(results, checkMatchCriteria(descriptionMatches, m.CountIf))
 
-	organizationIDMatches := intSliceMatch(r.OrganizationID, m.OrganizationID)
+	organizationIDMatches := intSliceMatch(r.OrganizationID, m.OrganizationIDs)
 	results = append(results, checkMatchCriteria(organizationIDMatches, m.CountIf))
 
-	regionIDMatches := intSliceMatch(r.RegionID, m.RegionID)
+	regionIDMatches := intSliceMatch(r.RegionID, m.RegionIDs)
 	results = append(results, checkMatchCriteria(regionIDMatches, m.CountIf))
 
 	results = append(results, m.ExternallyAccessible)
 
 	violation = checkMatchCriteria(results, m.CountIf)
 
-	if m.IgnoreViolationsWithCriteria && violation {
+	if m.IgnoreViolationWithCriteriaMatch && violation {
 		return !violation
 	}
 

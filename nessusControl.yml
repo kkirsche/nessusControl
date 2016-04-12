@@ -32,7 +32,7 @@ policyViolations:
     - descriptionRegexp: ['(This|That) is a match!', '(This|That) doesnt match sadly.']
     - organizationID: [1, 3]
     - regionID: [1, 3]
-    - ignoreViolationWithCriteria: false
+    - ignoreViolationWithCriteriaMatch: false
     - countIf: all
   - 81817:
     - externallyAccessible: true
@@ -40,5 +40,5 @@ policyViolations:
     - descriptionRegexp: ['(This|That) is a match!', '(This|That) doesnt match sadly.']
     - organizationID: [1, 3]
     - regionID: [1, 3]
-    - ignoreViolationWithCriteria: true
+    - ignoreViolationWithCriteriaMatch: true
     - countIf: all
