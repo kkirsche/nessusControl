@@ -16,4 +16,9 @@ func TestConnectToSQLite(t *testing.T) {
 		t.FailNow()
 	}
 	defer db.Close()
+
+	err = db.Ping()
+	if err != nil {
+		t.FailNow()
+	}
 }
