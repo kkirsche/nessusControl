@@ -32,7 +32,16 @@ var exportCmd = &cobra.Command{
 	Use:   "export",
 	Short: "Begin the export results pipeline for Nessus",
 	Long: `Begins running the export results pipeline to retrieve scan results
-from Nessus scans.`,
+from Nessus scans. The export pipeline consists of the following actions:
+
+* Retrieve active scans from SQLite3 database
+* Confirm with Nessus that the scan is not running anymore
+* Export the scan results as a CSV
+* Confirm with Nessus that the scan results export process is complete
+* Download the scan to the specified results directory
+* Delete the active scan entry in the SQLite3 database
+
+This is done concurrently and will continue to run until all rows are processed.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		transport := &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},

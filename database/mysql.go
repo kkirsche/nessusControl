@@ -48,7 +48,8 @@ func ConnectToMySQLDatabase(username, password, database, server string, tlsInfo
 		})
 
 		// Open the connection
-		db, err := sql.Open("mysql", username+":"+password+"@tcp("+server+":3306)/"+database+"?tls=skip-verify")
+		url := fmt.Sprintf("%s:%s@tcp(%s:3306)/%s?tls=skip-verify", username, password, server, database)
+		db, err := sql.Open("mysql", url)
 		if err != nil {
 			return nil, fmt.Errorf("Couldn't connect to database: %s", err.Error())
 		}
