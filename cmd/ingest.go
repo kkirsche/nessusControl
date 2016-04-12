@@ -31,8 +31,18 @@ import (
 var ingestCmd = &cobra.Command{
 	Use:   "ingest",
 	Short: "Begin the ingest pipeline for Nessus",
-	Long: `Begins running the ingest pipeline to create and launch new Nessus
-scans.`,
+	Long: `Begins running the ingest requested scan pipeline to start Nessus
+scans. The ingest pipeline consists of the following actions:
+
+* Create required directories which don't exist
+* Concurrently process the requested scan file directory.
+* For each requested scan file, create a new scan
+* Launch the created scan
+* Create the SQLite3 database table if it does not exist
+* Save the launched scan's information to the SQLite3 database
+
+This is done concurrently and will continue to run until all requested scan
+files are processed.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		transport := &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},

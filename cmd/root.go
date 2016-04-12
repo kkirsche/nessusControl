@@ -29,9 +29,10 @@ var RootCmd = &cobra.Command{
 	Use:   "nessusControl",
 	Short: "Nessus Control is used to control a Nessus infrastructure from your command line",
 	Long: `Nessus Control is a CLI tool designed to control a Nessus infrastructure.
-	This includes automatically creating scans, exporting results, processing the results
-	, and storing the processed results in a MySQL database. During processing,
-	tasks such as rewriting severity of a plugin may occur`,
+
+This includes automatically creating scans, exporting results, processing the
+results, and storing the processed results in a MySQL database. During
+processing, tasks such as rewriting severity of a plugin may occur`,
 }
 
 // Execute adds all child commands to the root command sets flags appropriately.
