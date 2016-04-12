@@ -1,8 +1,14 @@
 language: go
 sudo: false
 
+services:
+  - mysql
+
 notifications:
   email: false
+
+before_install:
+  - mysql -e "create database IF NOT EXISTS test;" -uroot
 
 before_script:
   - go vet ./...
