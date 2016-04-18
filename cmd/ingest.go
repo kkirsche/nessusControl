@@ -56,7 +56,7 @@ files are processed.`,
 
 		apiClient, err := apiClient.CreateSession(httpClient)
 		if err != nil {
-			log.Fatal(err.Error())
+			log.Panicln(err)
 		}
 
 		nessusDB, err := nessusDatabase.ConnectToSQLite(viper.GetString("sqlitePath"))
@@ -69,7 +69,7 @@ files are processed.`,
 			debugEnabled)
 		err = creator.IngestPipeline(moveFilesDuringPipeline)
 		if err != nil {
-			log.Fatal(err.Error())
+			log.Panicln(err)
 		}
 	},
 }

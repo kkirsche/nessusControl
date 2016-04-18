@@ -54,12 +54,12 @@ This is done concurrently and will continue to run until all rows are processed.
 
 		apiClient, err := apiClient.CreateSession(httpClient)
 		if err != nil {
-			log.Fatal(err.Error())
+			log.Panicln(err)
 		}
 
 		nessusDB, err := nessusDatabase.ConnectToSQLite(viper.GetString("sqlitePath"))
 		if err != nil {
-			log.Fatal(err.Error())
+			log.Panicln(err)
 		}
 
 		fileLocations := nessusExporter.NewFileLocations(viper.GetString("directories.base"),
@@ -68,7 +68,7 @@ This is done concurrently and will continue to run until all rows are processed.
 		exporter := nessusExporter.NewExporter(apiClient, httpClient, nessusDB, fileLocations, debugEnabled)
 		err = exporter.ExportResultPipeline()
 		if err != nil {
-			log.Fatal(err.Error())
+			log.Panicln(err)
 		}
 	},
 }

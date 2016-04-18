@@ -46,14 +46,14 @@ local machine, usually for further processing.`,
 			transporter := nessusTransporter.NewTransporter(sshKey, sshAuth, targetHost, withSSHAgent, withDebug)
 			err := transporter.Connect()
 			if err != nil {
-				log.Fatal(err)
+				log.Panicln(err)
 			}
 
 			err = transporter.RetrieveResultFiles(viper.GetString(transportBase+".resultPath"),
 				viper.GetString("directories.base")+viper.GetString("directories.results"),
 				viper.GetBool(transportBase+"removeResultFiles"))
 			if err != nil {
-				log.Fatal(err)
+				log.Panicln(err)
 			}
 		}
 	},
