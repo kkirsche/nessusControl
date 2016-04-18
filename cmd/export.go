@@ -16,9 +16,9 @@ package cmd
 
 import (
 	"crypto/tls"
+	"fmt"
 	"log"
 	"net/http"
-	"os/user"
 
 	"github.com/kkirsche/nessusControl/api"
 	"github.com/kkirsche/nessusControl/database"
@@ -62,10 +62,12 @@ This is done concurrently and will continue to run until all rows are processed.
 			log.Panicln(err)
 		}
 
-		fileLocations := nessusExporter.NewFileLocations(viper.GetString("directories.base"),
-			viper.GetString("directories.results"))
+		if viper.GetBool("debug") {
+			fmt.Printf("Results will be looked for in: %s/results\n", viper.GetString("directories.result_base_path"))
+		}
 
-		exporter := nessusExporter.NewExporter(apiClient, httpClient, nessusDB, fileLocations, debugEnabled)
+		exporter := nessusExporter.NewExporter(apiClient, httpClient, nessusDB, viper.GetString("directories.result_base_path"), debugEnabled)
+
 		err = exporter.ExportResultPipeline()
 		if err != nil {
 			log.Panicln(err)
@@ -75,20 +77,16 @@ This is done concurrently and will continue to run until all rows are processed.
 
 func init() {
 	RootCmd.AddCommand(exportCmd)
-	usr, _ := user.Current()
 
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	exportCmd.PersistentFlags().StringP("basepath", "b", usr.HomeDir, "The base path to the results directory")
-	exportCmd.PersistentFlags().StringP("resultspath", "r", "/nessusResults", "The relative path to the results directory from the base directory")
+	exportCmd.PersistentFlags().StringP("sqlitePath", "s", "/opt/scanner/nessusControl.db", "The path to the Nessus SQLite database.")
+	viper.BindPFlag("sqlitePath", ingestCmd.PersistentFlags().Lookup("sqlitePath"))
 
-	viper.BindPFlag("directories.base", exportCmd.PersistentFlags().Lookup("basepath"))
-	viper.BindPFlag("directories.results", exportCmd.PersistentFlags().Lookup("resultspath"))
-
-	viper.SetDefault("directories.base", usr.HomeDir)
-	viper.SetDefault("directories.results", "/nessusResults")
+	exportCmd.PersistentFlags().StringP("result-base-path", "r", "/opt/scanner", "The base path to the results directory")
+	viper.BindPFlag("directories.result_base_path", exportCmd.PersistentFlags().Lookup("result-base-path"))
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:

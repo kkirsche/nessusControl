@@ -16,9 +16,9 @@ package cmd
 
 import (
 	"crypto/tls"
+	"fmt"
 	"log"
 	"net/http"
-	"os/user"
 
 	"github.com/kkirsche/nessusControl/api"
 	"github.com/kkirsche/nessusControl/creator"
@@ -48,25 +48,50 @@ files are processed.`,
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 		}
 		httpClient := &http.Client{Transport: transport}
-		debugEnabled := false
+		debugEnabled := viper.GetBool("debug")
 		moveFilesDuringPipeline := false
 		apiClient := nessusAPI.NewUsernameClient(viper.GetString("nessusLocation.hostname"),
 			viper.GetString("nessusLocation.port"), viper.GetString("auth.username"),
-			viper.GetString("auth.password"), viper.GetBool("debug"))
+			viper.GetString("auth.password"), debugEnabled)
 
 		apiClient, err := apiClient.CreateSession(httpClient)
 		if err != nil {
 			log.Panicln(err)
 		}
 
-		nessusDB, err := nessusDatabase.ConnectToSQLite(viper.GetString("sqlitePath"))
-		if err != nil {
-			log.Fatal(err.Error())
+		sqlitePath := viper.GetString("sqlitePath")
+		if debugEnabled {
+			fmt.Printf("Connecting to database: %s\n", sqlitePath)
 		}
 
-		creator := nessusCreator.NewCreator(viper.GetString("directories.base")+
-			viper.GetString("directories.incoming"), apiClient, httpClient, nessusDB,
-			debugEnabled)
+		nessusDB, err := nessusDatabase.ConnectToSQLite(sqlitePath)
+		if err != nil {
+			log.Panicln(err)
+		}
+
+		if debugEnabled {
+			fmt.Printf("Connected to database %s.\n", sqlitePath)
+		}
+
+		if apiClient == nil {
+			fmt.Println("API Client is nil. Please contact the developer.")
+		}
+
+		if httpClient == nil {
+			fmt.Println("HTTP Client is nil. Please contact the developer.")
+		}
+
+		if nessusDB == nil {
+			fmt.Println("Nessus DB is nil. Please contact the developer.")
+		}
+
+		ingestBasePath := viper.GetString("directories.ingest_base_path")
+		creator := nessusCreator.NewCreator(ingestBasePath, apiClient, httpClient, nessusDB, debugEnabled)
+
+		if debugEnabled {
+			fmt.Println("Creator successfully created. Launching the ingest pipeline")
+		}
+
 		err = creator.IngestPipeline(moveFilesDuringPipeline)
 		if err != nil {
 			log.Panicln(err)
@@ -76,23 +101,16 @@ files are processed.`,
 
 func init() {
 	RootCmd.AddCommand(ingestCmd)
-	usr, _ := user.Current()
 
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	ingestCmd.PersistentFlags().StringP("sqlitePath", "s", usr.HomeDir+"/nessusIncoming", "The path to the Nessus SQLite database.")
+	ingestCmd.PersistentFlags().StringP("sqlitePath", "s", "/opt/scanner/nessusControl.db", "The path to the Nessus SQLite database.")
 	viper.BindPFlag("sqlitePath", ingestCmd.PersistentFlags().Lookup("sqlitePath"))
-	viper.SetDefault("sqlitePath", usr.HomeDir+"/nessusControl.db")
 
-	ingestCmd.PersistentFlags().StringP("basepath", "b", usr.HomeDir, "The path to the Nessus request scan files.")
-	viper.BindPFlag("directories.base", ingestCmd.PersistentFlags().Lookup("basepath"))
-	viper.SetDefault("directories.base", usr.HomeDir)
-
-	ingestCmd.PersistentFlags().StringP("requestedPath", "r", "/nessusRequestedScans", "The relative path to the Nessus request scan files from the base directory.")
-	viper.BindPFlag("directories.incoming", ingestCmd.PersistentFlags().Lookup("requestedPath"))
-	viper.SetDefault("directories.incoming", "/nessusRequestedScans")
+	ingestCmd.PersistentFlags().StringP("ingest-base-path", "i", "/opt/scanner", "The base path to Nessus request scan files. From here, <ingest-base-path>/targets/incoming, <ingest-base-path>/targets/archive, and <ingest-base-path>/targets/temp<pid> will be used.")
+	viper.BindPFlag("directories.ingest_base_path", ingestCmd.PersistentFlags().Lookup("ingest-base-path"))
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// ingestCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
