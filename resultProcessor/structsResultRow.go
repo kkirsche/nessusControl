@@ -19,6 +19,8 @@ type Nessus6ResultRow struct {
 	PluginOutput string
 
 	// Additional (Optional) Criteria. Usually only necessary in larger companies
-	OrganizationID int
-	RegionID       int
+	ExternallyAccessible bool
+	OrganizationID       int
+	RegionID             int
+	Severity             int
 }

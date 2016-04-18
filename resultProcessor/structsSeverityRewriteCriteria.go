@@ -1,17 +1,23 @@
 package nessusProcessor
 
-// SeverityRewriteValuesCriteria holds information used by nessusProcessor to
+// RiskRewriteCriteria is a container to hold the Values and Plugins configurations
+type RiskRewriteCriteria struct {
+	Values  RiskRewriteValuesCriteria
+	Plugins []RiskRewritePluginsCriteria
+}
+
+// RiskRewriteValuesCriteria holds information used by nessusProcessor to
 // convert the text severity to a numeric value
-type SeverityRewriteValuesCriteria struct {
+type RiskRewriteValuesCriteria struct {
 	High   int
 	Medium int
 	Low    int
 	NoRisk int
 }
 
-// SeverityRewritePluginsCriteria holds information used by nessusProcessor to
+// RiskRewritePluginsCriteria holds information used by nessusProcessor to
 // convert a specific plugin to be a specific severity
-type SeverityRewritePluginsCriteria struct {
+type RiskRewritePluginsCriteria struct {
 	PluginID             int
 	ExternallyAccessible bool
 	Severity             int
