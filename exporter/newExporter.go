@@ -2,12 +2,14 @@ package nessusExporter
 
 import (
 	"database/sql"
-	"github.com/kkirsche/nessusControl/api"
+	"fmt"
 	"net/http"
+
+	"github.com/kkirsche/nessusControl/api"
 )
 
 // NewExporter returns a new exporter instance for use in exporting scan results
-func NewExporter(apiClient *nessusAPI.Client, httpClient *http.Client, sqliteDB *sql.DB, fileLocations fileLocations, debug bool) *Exporter {
+func NewExporter(apiClient *nessusAPI.Client, httpClient *http.Client, sqliteDB *sql.DB, baseDirectory string, debug bool) *Exporter {
 	return &Exporter{
 		apiClient:     apiClient,
 		sqliteDB:      sqliteDB,
