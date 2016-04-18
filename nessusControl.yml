@@ -8,9 +8,8 @@ nessusLocation:
 sqlitePath: "/Users/exampleUser/nessusControl.db"
 debug: false
 directories:
-  base: "/Users/exampleUser"
-  incoming: "/nessusRequestedScans"
-  results: "/nessusResults"
+  ingest_base_path: "/Users/exampleUser/nessusRequestedScans"
+  result_base_path: "/Users/exampleUser/nessusResults"
 transport:
   scanners: ["scanner1"]
   scanner1:
