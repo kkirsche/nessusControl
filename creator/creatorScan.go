@@ -3,10 +3,11 @@ package nessusCreator
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/kkirsche/nessusControl/api"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/kkirsche/nessusControl/api"
 )
 
 func (c *Creator) saveLaunchedScan(launchedScanCh chan ScanData) error {
@@ -52,7 +53,7 @@ func (c *Creator) launchScan(createdScanResponseCh chan ScanData) chan ScanData 
 				c.debugln("launchScan(): Failed to launch scan with error " + err.Error())
 			} else {
 				createdScanResponseData.LaunchedScan = launchedScan
-				createdScanResponseData.ScanStartTime = time.Now().UTC().Format(time.RFC3339)
+				createdScanResponseData.ScanStartTime = time.Now().UTC().Format(RFC3339Safe)
 				launchedScanCh <- createdScanResponseData
 			}
 			wg.Done()
