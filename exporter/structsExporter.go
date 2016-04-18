@@ -2,8 +2,9 @@ package nessusExporter
 
 import (
 	"database/sql"
-	"github.com/kkirsche/nessusControl/api"
 	"net/http"
+
+	"github.com/kkirsche/nessusControl/api"
 )
 
 // Exporter is used to retrieve
@@ -11,11 +12,12 @@ type Exporter struct {
 	apiClient     *nessusAPI.Client
 	sqliteDB      *sql.DB
 	httpClient    *http.Client
-	fileLocations fileLocations
+	fileLocations FileLocations
 	debug         bool
 }
 
-type fileLocations struct {
+// FileLocations represents where files should be held
+type FileLocations struct {
 	baseDirectory    string
 	resultsDirectory string
 }

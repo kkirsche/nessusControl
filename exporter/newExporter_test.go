@@ -1,11 +1,12 @@
 package nessusExporter
 
 import (
-	"github.com/kkirsche/nessusControl/api"
-	"github.com/kkirsche/nessusControl/database"
 	"net/http"
 	"os"
 	"testing"
+
+	"github.com/kkirsche/nessusControl/api"
+	"github.com/kkirsche/nessusControl/database"
 )
 
 func TestNewCreator(t *testing.T) {
@@ -20,8 +21,10 @@ func TestNewCreator(t *testing.T) {
 	if err != nil {
 		t.FailNow()
 	}
-	fileLocations := fileLocations{}
-	exporter := NewExporter(client, httpClient, db, fileLocations, debug)
+	fileLocations := FileLocations{
+		resultsDirectory: "/results",
+	}
+	exporter := NewExporter(client, httpClient, db, "", debug)
 
 	if exporter.debug != false ||
 		exporter.apiClient != client ||

@@ -12,15 +12,15 @@ func NewExporter(apiClient *nessusAPI.Client, httpClient *http.Client, sqliteDB 
 		apiClient:     apiClient,
 		sqliteDB:      sqliteDB,
 		httpClient:    httpClient,
-		fileLocations: fileLocations,
+		fileLocations: NewFileLocations(baseDirectory),
 		debug:         debug,
 	}
 }
 
 // NewFileLocations returns a new fileLocations struct for use in an exporter.
-func NewFileLocations(baseDirectory, pathToResultsFromBase string) fileLocations {
-	return fileLocations{
+func NewFileLocations(baseDirectory string) FileLocations {
+	return FileLocations{
 		baseDirectory:    baseDirectory,
-		resultsDirectory: baseDirectory + pathToResultsFromBase,
+		resultsDirectory: fmt.Sprintf("%s/results", baseDirectory),
 	}
 }
