@@ -20,6 +20,7 @@ func (e *Exporter) ExportResultPipeline() error {
 	defer rows.Close()
 
 	wg := new(sync.WaitGroup)
+	errCh := make(chan error)
 
 	var requestIDs []int
 	for rows.Next() {
@@ -27,31 +28,35 @@ func (e *Exporter) ExportResultPipeline() error {
 		var launchedScanRow launchedScanDBRow
 		rows.Scan(&launchedScanRow.requestID, &launchedScanRow.method, &launchedScanRow.scanUUID, &launchedScanRow.scanID, &launchedScanRow.scanStartTime)
 		go func(wg *sync.WaitGroup, e *Exporter, launchedScanRow launchedScanDBRow, requestIDs []int) {
-			details, err := e.apiClient.ScanDetails(e.httpClient, launchedScanRow.scanID)
-			if err != nil {
+			details, forLoopErr := e.apiClient.ScanDetails(e.httpClient, launchedScanRow.scanID)
+			if forLoopErr != nil {
+				errCh <- forLoopErr
 				wg.Done()
 				return
 			}
 
 			for details.Info.Status == "running" {
 				time.Sleep(10000)
-				details, err = e.apiClient.ScanDetails(e.httpClient, launchedScanRow.scanID)
-				if err != nil {
+				details, forLoopErr = e.apiClient.ScanDetails(e.httpClient, launchedScanRow.scanID)
+				if forLoopErr != nil {
+					errCh <- forLoopErr
 					wg.Done()
 					return
 				}
 			}
 
-			exportedFileResponse, err := e.apiClient.ExportScan(e.httpClient, launchedScanRow.scanID, `{"format":"csv"}`)
-			if err != nil {
+			exportedFileResponse, forLoopErr := e.apiClient.ExportScan(e.httpClient, launchedScanRow.scanID, `{"format":"csv"}`)
+			if forLoopErr != nil {
+				errCh <- forLoopErr
 				wg.Done()
 				return
 			}
 
 			readyToExport := false
 			for readyToExport {
-				status, err := e.apiClient.ScanExportStatus(e.httpClient, launchedScanRow.scanID, exportedFileResponse.File)
-				if err != nil {
+				status, forErr := e.apiClient.ScanExportStatus(e.httpClient, launchedScanRow.scanID, exportedFileResponse.File)
+				if forErr != nil {
+					errCh <- forErr
 					wg.Done()
 					return
 				}
@@ -64,14 +69,17 @@ func (e *Exporter) ExportResultPipeline() error {
 				time.Sleep(10000)
 			}
 
-			scanResults, err := e.apiClient.DownloadScan(e.httpClient, launchedScanRow.scanID, exportedFileResponse.File)
-			if err != nil {
+			scanResults, forLoopErr := e.apiClient.DownloadScan(e.httpClient, launchedScanRow.scanID, exportedFileResponse.File)
+			if forLoopErr != nil {
+				errCh <- forLoopErr
+				wg.Done()
 				return
 			}
 			filename := fmt.Sprintf("Scanner_%s-RequestID_%d-Method_%s-ScanId_%d-Time_%s.csv", getLocalIPAddress(), launchedScanRow.requestID, launchedScanRow.method, launchedScanRow.scanID, launchedScanRow.scanStartTime)
 			filepath := fmt.Sprintf("%s/%s", e.fileLocations.resultsDirectory, filename)
-			err = ioutil.WriteFile(filepath, []byte(scanResults), 0644)
-			if err != nil {
+			forLoopErr = ioutil.WriteFile(filepath, []byte(scanResults), 0644)
+			if forLoopErr != nil {
+				errCh <- forLoopErr
 				wg.Done()
 				return
 			}
@@ -84,15 +92,21 @@ func (e *Exporter) ExportResultPipeline() error {
 		return err
 	}
 
-	for _, requestID := range requestIDs {
-		_, err = e.sqliteDB.Exec("DELETE FROM active_scans WHERE scan_id = $a;", requestID)
+	wg.Wait()
+	close(errCh)
+
+	for err := range errCh {
 		if err != nil {
-			fmt.Print("Delete the row")
 			return err
 		}
 	}
 
-	wg.Wait()
+	for _, requestID := range requestIDs {
+		_, err = e.sqliteDB.Exec("DELETE FROM active_scans WHERE scan_id = $a;", requestID)
+		if err != nil {
+			return err
+		}
+	}
 
 	return nil
 }
