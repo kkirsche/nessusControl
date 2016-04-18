@@ -7,8 +7,10 @@ type MatchCriteria struct {
 	ExternallyAccessible             bool
 	Ports                            []int
 	DescriptionRegexps               []string
+	NotDescriptionRegexps            []string
 	OrganizationIDs                  []int
 	RegionIDs                        []int
 	IgnoreViolationWithCriteriaMatch bool
+	PreviousViolationCheck           bool
 	CountIf                          string
 }

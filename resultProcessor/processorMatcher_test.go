@@ -1,8 +1,6 @@
 package nessusProcessor
 
-import (
-	"testing"
-)
+import "testing"
 
 func TestPositiveIntMatch(t *testing.T) {
 	a := 1
@@ -101,6 +99,30 @@ func TestNegativeRegexpMatch(t *testing.T) {
 	criteria := []string{"abcdef", "zyxw"}
 
 	matches := regexpStringSliceMatch(result, criteria)
+	for _, match := range matches {
+		if match {
+			t.FailNow()
+		}
+	}
+}
+
+func TestPositiveNotRegexpMatch(t *testing.T) {
+	result := "This could be a match!"
+	criteria := []string{"abcdef", "zyxw"}
+
+	matches := notRegexpStringSliceMatch(result, criteria)
+	for _, match := range matches {
+		if !match {
+			t.FailNow()
+		}
+	}
+}
+
+func TestNegativeNotRegexpMatch(t *testing.T) {
+	result := "This could be a match!"
+	criteria := []string{"(This|That) could be a (success|match)!"}
+
+	matches := notRegexpStringSliceMatch(result, criteria)
 	for _, match := range matches {
 		if match {
 			t.FailNow()

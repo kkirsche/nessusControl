@@ -25,19 +25,13 @@ transport:
     withSSHAgent: false
     removeResultFiles: true
 policyViolations:
-  - 81817:
-    - externallyAccessible: true
-    - port: [123, 321]
-    - descriptionRegexp: ['(This|That) is a match!', '(This|That) doesnt match sadly.']
-    - organizationID: [1, 3]
-    - regionID: [1, 3]
-    - ignoreViolationWithCriteriaMatch: false
-    - countIf: all
-  - 81817:
-    - externallyAccessible: true
-    - port: [678, 876]
-    - descriptionRegexp: ['(This|That) is a match!', '(This|That) doesnt match sadly.']
-    - organizationID: [1, 3]
-    - regionID: [1, 3]
-    - ignoreViolationWithCriteriaMatch: true
-    - countIf: all
+  - pluginID: 81817
+    externallyAccessible: true
+    port: [123, 321]
+    descriptionRegexp: ['(This|That) is a match!', '(This|That) doesnt match sadly.']
+    notDescriptionRegexp: ['If this matches\,? return false']
+    organizationID: [1, 3]
+    regionID: [1, 3]
+    ignoreViolationWithCriteriaMatch: false
+    previousViolationCheck: false
+    countIf: all

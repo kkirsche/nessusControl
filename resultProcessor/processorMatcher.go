@@ -1,8 +1,6 @@
 package nessusProcessor
 
-import (
-	"regexp"
-)
+import "regexp"
 
 func intMatch(a, b int) bool {
 	return a == b
@@ -42,6 +40,19 @@ func regexpStringSliceMatch(resultString string, regexpStrings []string) []bool 
 	for _, regexpString := range regexpStrings {
 		compiledRegexp := regexp.MustCompile(regexpString)
 		if compiledRegexp.FindStringIndex(resultString) != nil {
+			match = append(match, true)
+		}
+	}
+
+	return match
+}
+
+func notRegexpStringSliceMatch(resultString string, regexpStrings []string) []bool {
+	match := []bool{}
+
+	for _, regexpString := range regexpStrings {
+		compiledRegexp := regexp.MustCompile(regexpString)
+		if compiledRegexp.FindStringIndex(resultString) == nil {
 			match = append(match, true)
 		}
 	}
