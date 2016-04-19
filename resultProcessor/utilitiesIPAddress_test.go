@@ -23,7 +23,7 @@ func TestIPv4ToHex(t *testing.T) {
 		t.FailNow()
 	}
 
-	ipHex := IPv4ToHex(ip)
+	ipHex := IPToHex(ip)
 	if ipHex != "0a000509" {
 		t.FailNow()
 	}
@@ -32,10 +32,7 @@ func TestIPv4ToHex(t *testing.T) {
 func TestIPv6ToHex(t *testing.T) {
 	ip := net.ParseIP("fdfe::5a55:caff:fefa:9089")
 
-	ipHex, err := IPv6ToHex(ip)
-	if err != nil {
-		t.FailNow()
-	}
+	ipHex := IPToHex(ip)
 
 	if ipHex != "fdfe0000000000005a55cafffefa9089" {
 		t.FailNow()
