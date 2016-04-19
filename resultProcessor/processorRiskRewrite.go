@@ -3,18 +3,18 @@ package nessusProcessor
 import "fmt"
 
 // RiskTextToNumber converts a textual severity into a numeric severity
-func (s *RiskRewriteValuesCriteria) RiskTextToNumber(severity string) (int, error) {
-	switch severity {
+func (r *RiskRewriteValuesCriteria) RiskTextToNumber(risk string) (int, error) {
+	switch risk {
 	case "High":
-		return s.High, nil
+		return r.High, nil
 	case "Medium":
-		return s.Medium, nil
+		return r.Medium, nil
 	case "Low":
-		return s.Low, nil
+		return r.Low, nil
 	case "No Risk":
-		return s.NoRisk, nil
+		return r.NoRisk, nil
 	default:
-		return 0, fmt.Errorf("Received unknown severity string. Expected: 'High', 'Medium', 'Low', or 'No Risk'. Received: " + severity)
+		return 0, fmt.Errorf("Received unknown severity string. Expected: 'High', 'Medium', 'Low', or 'No Risk'. Received: " + risk)
 	}
 }
 
