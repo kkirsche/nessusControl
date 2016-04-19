@@ -1,4 +1,4 @@
-package nessusCreator
+package nessusProcessor
 
 const (
 	// RFC3339Safe is RFC3339 with :'s replaced with dashes for filesystem safety
