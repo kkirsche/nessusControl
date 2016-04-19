@@ -4,29 +4,29 @@ package nessusProcessor
 // configuration file. This function checks for matches with the Plugin ID,
 // Port, Description Regular Expressions, organization ID, region ID and
 // external accessibility.
-func (m *MatchCriteria) CheckForViolation(r *Nessus6ResultRow) bool {
+func (p *PolicyViolationMatchCriteria) CheckForViolation(r *Nessus6ResultRow) bool {
 	violation := false
 	results := []bool{}
 
-	results = append(results, intMatch(r.PluginID, m.PluginID))
+	results = append(results, intMatch(r.PluginID, p.PluginID))
 
-	portMatches := intSliceMatch(r.Port, m.Ports)
-	results = append(results, checkMatchCriteria(portMatches, m.CountIf))
+	portMatches := intSliceMatch(r.Port, p.Ports)
+	results = append(results, checkMatchCriteria(portMatches, p.CountIf))
 
-	descriptionMatches := regexpStringSliceMatch(r.Description, m.DescriptionRegexps)
-	results = append(results, checkMatchCriteria(descriptionMatches, m.CountIf))
+	descriptionMatches := regexpStringSliceMatch(r.Description, p.DescriptionRegexp)
+	results = append(results, checkMatchCriteria(descriptionMatches, p.CountIf))
 
-	organizationIDMatches := intSliceMatch(r.OrganizationID, m.OrganizationIDs)
-	results = append(results, checkMatchCriteria(organizationIDMatches, m.CountIf))
+	organizationIDMatches := intSliceMatch(r.OrganizationID, p.OrganizationIDs)
+	results = append(results, checkMatchCriteria(organizationIDMatches, p.CountIf))
 
-	regionIDMatches := intSliceMatch(r.RegionID, m.RegionIDs)
-	results = append(results, checkMatchCriteria(regionIDMatches, m.CountIf))
+	regionIDMatches := intSliceMatch(r.RegionID, p.RegionIDs)
+	results = append(results, checkMatchCriteria(regionIDMatches, p.CountIf))
 
-	results = append(results, m.ExternallyAccessible)
+	results = append(results, p.ExternallyAccessible)
 
-	violation = checkMatchCriteria(results, m.CountIf)
+	violation = checkMatchCriteria(results, p.CountIf)
 
-	if m.IgnoreViolationWithCriteriaMatch && violation {
+	if p.IgnoreViolationWithCriteriaMatch && violation {
 		return !violation
 	}
 

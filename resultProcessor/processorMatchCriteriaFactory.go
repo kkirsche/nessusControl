@@ -1,18 +1,18 @@
 package nessusProcessor
 
-// NewMatchCriteria creates a MatchCriteria structure and returns a pointer to
-// the new structure.
-func NewMatchCriteria(pluginID int, externallyAccessible,
+// NewPolicyViolationMatchCriteria creates a PolicyViolationMatchCriteria
+// structure and returns a pointer to the new structure.
+func NewPolicyViolationMatchCriteria(pluginID int, externallyAccessible,
 	ignoreViolationWithCriteriaMatch bool, ports, organizationIDs, regionIDs []int,
-	descriptionRegularExpressions []string, countIf string) *MatchCriteria {
-	return &MatchCriteria{
+	descriptionRegularExpressions []string, countIf string) *PolicyViolationMatchCriteria {
+	return &PolicyViolationMatchCriteria{
 		PluginID:                         pluginID,
 		ExternallyAccessible:             externallyAccessible,
 		IgnoreViolationWithCriteriaMatch: ignoreViolationWithCriteriaMatch,
-		Ports:              ports,
-		OrganizationIDs:    organizationIDs,
-		RegionIDs:          regionIDs,
-		DescriptionRegexps: descriptionRegularExpressions,
-		CountIf:            countIf,
+		Ports:             ports,
+		OrganizationIDs:   organizationIDs,
+		RegionIDs:         regionIDs,
+		DescriptionRegexp: descriptionRegularExpressions,
+		CountIf:           countIf,
 	}
 }

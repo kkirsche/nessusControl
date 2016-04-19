@@ -23,66 +23,66 @@ var (
 		RegionID:       2,
 	}
 
-	positiveAnyMatchCriteria = &MatchCriteria{
+	positiveAnyMatchCriteria = &PolicyViolationMatchCriteria{
 		PluginID:                         71783,
 		ExternallyAccessible:             true,
 		Ports:                            []int{514, 123},
-		DescriptionRegexps:               []string{"(The|This|That) version of ntpd", "This better not match"},
+		DescriptionRegexp:                []string{"(The|This|That) version of ntpd", "This better not match"},
 		OrganizationIDs:                  []int{5, 3, 1},
 		RegionIDs:                        []int{6, 4, 2},
 		IgnoreViolationWithCriteriaMatch: false,
 		CountIf: "any",
 	}
 
-	positiveAllMatchCriteria = &MatchCriteria{
+	positiveAllMatchCriteria = &PolicyViolationMatchCriteria{
 		PluginID:                         71783,
 		ExternallyAccessible:             true,
 		Ports:                            []int{514, 123},
-		DescriptionRegexps:               []string{"(The|This|That) version of ntpd", "This better not match"},
+		DescriptionRegexp:                []string{"(The|This|That) version of ntpd", "This better not match"},
 		OrganizationIDs:                  []int{5, 3, 1},
 		RegionIDs:                        []int{6, 4, 2},
 		IgnoreViolationWithCriteriaMatch: false,
 		CountIf: "all",
 	}
 
-	positiveIgnoredAnyMatchCriteria = &MatchCriteria{
+	positiveIgnoredAnyMatchCriteria = &PolicyViolationMatchCriteria{
 		PluginID:                         71783,
 		ExternallyAccessible:             true,
 		Ports:                            []int{514, 123},
-		DescriptionRegexps:               []string{"(The|This|That) version of ntpd", "This better not match"},
+		DescriptionRegexp:                []string{"(The|This|That) version of ntpd", "This better not match"},
 		OrganizationIDs:                  []int{5, 3, 1},
 		RegionIDs:                        []int{6, 4, 2},
 		IgnoreViolationWithCriteriaMatch: true,
 		CountIf: "any",
 	}
 
-	negativeAnyMatchCriteria = &MatchCriteria{
+	negativeAnyMatchCriteria = &PolicyViolationMatchCriteria{
 		PluginID:                         1234,
 		ExternallyAccessible:             false,
 		Ports:                            []int{1},
-		DescriptionRegexps:               []string{"This is a lot of structs?", "This better not match"},
+		DescriptionRegexp:                []string{"This is a lot of structs?", "This better not match"},
 		OrganizationIDs:                  []int{6, 4, 2},
 		RegionIDs:                        []int{5, 3, 1},
 		IgnoreViolationWithCriteriaMatch: false,
 		CountIf: "any",
 	}
 
-	negativeAllMatchCriteria = &MatchCriteria{
+	negativeAllMatchCriteria = &PolicyViolationMatchCriteria{
 		PluginID:                         1234,
 		ExternallyAccessible:             false,
 		Ports:                            []int{1},
-		DescriptionRegexps:               []string{"This is a lot of structs?", "This better not match"},
+		DescriptionRegexp:                []string{"This is a lot of structs?", "This better not match"},
 		OrganizationIDs:                  []int{6, 4, 2},
 		RegionIDs:                        []int{5, 3, 1},
 		IgnoreViolationWithCriteriaMatch: false,
 		CountIf: "all",
 	}
 
-	negativeIgnoredAnyMatchCriteria = &MatchCriteria{
+	negativeIgnoredAnyMatchCriteria = &PolicyViolationMatchCriteria{
 		PluginID:                         1234,
 		ExternallyAccessible:             false,
 		Ports:                            []int{1},
-		DescriptionRegexps:               []string{"This is a lot of structs?", "This better not match"},
+		DescriptionRegexp:                []string{"This is a lot of structs?", "This better not match"},
 		OrganizationIDs:                  []int{6, 4, 2},
 		RegionIDs:                        []int{5, 3, 1},
 		IgnoreViolationWithCriteriaMatch: true,
