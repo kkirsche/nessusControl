@@ -25,7 +25,7 @@ transport:
     withSSHAgent: false
     removeResultFiles: true
 policyViolations:
-  - pluginID: 81817
+  - pluginID: 81817 # Elasticsearch Detection
     externallyAccessible: true
     port: [123, 321]
     descriptionRegexp: ['(This|That) is a match!', '(This|That) doesnt match sadly.']
@@ -35,3 +35,10 @@ policyViolations:
     ignoreViolationWithCriteriaMatch: false
     previousViolationCheck: false
     countIf: all
+falsePositives:
+  - pluginID: 20007 # SSL Version 2 and 3 Protocol Detection
+    port: 2738 # HP Discovery Agent
+    procotol: "tcp"
+    descriptionRegexp: []
+    checkIfIsNotDefined: false
+    sqlSolarisCheck: false
