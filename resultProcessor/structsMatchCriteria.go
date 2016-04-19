@@ -19,7 +19,7 @@ type PolicyViolationMatchCriteria struct {
 // checking for a false positive.
 type FalsePositiveMatchCriteria struct {
 	PluginID            int
-	Port                int
+	Ports               []int
 	Protocol            string
 	DescriptionRegexp   []string
 	CheckIfIsNotDefined bool
