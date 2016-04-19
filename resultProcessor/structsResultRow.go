@@ -20,6 +20,8 @@ type Nessus6ResultRow struct {
 
 	// Additional (Optional) Criteria. Usually only necessary in larger companies
 	ExternallyAccessible bool
+	FalsePositive        bool
+	PolicyViolation      bool
 	OrganizationID       int
 	RegionID             int
 	Severity             int
