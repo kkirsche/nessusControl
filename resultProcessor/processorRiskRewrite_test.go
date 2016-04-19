@@ -84,7 +84,7 @@ func TestNonMatchingValidateCriteriaForPluginID(t *testing.T) {
 	}
 }
 
-func TestMatchingCheckForUserDefinedPluginRisk(t *testing.T) {
+func TestMatchingIsSeverityDefinedForCriteria(t *testing.T) {
 	r1 := RiskRewritePluginsCriteria{
 		PluginID:             123,
 		ExternallyAccessible: true,
@@ -104,14 +104,18 @@ func TestMatchingCheckForUserDefinedPluginRisk(t *testing.T) {
 		ExternallyAccessible: false,
 	}
 
-	CheckForUserDefinedPluginRisk(n, r)
+	match, severity := IsSeverityDefinedForCriteria(n, r)
+
+	if match {
+		n.Severity = severity
+	}
 
 	if n.Severity != 42 {
 		t.FailNow()
 	}
 }
 
-func TestNonMatchingCheckForUserDefinedPluginRisk(t *testing.T) {
+func TestNonMatchingIsSeverityDefinedForCriteria(t *testing.T) {
 	r1 := RiskRewritePluginsCriteria{
 		PluginID:             123,
 		ExternallyAccessible: true,
@@ -130,7 +134,11 @@ func TestNonMatchingCheckForUserDefinedPluginRisk(t *testing.T) {
 		PluginID: 890,
 	}
 
-	CheckForUserDefinedPluginRisk(n, r)
+	match, severity := IsSeverityDefinedForCriteria(n, r)
+
+	if match {
+		n.Severity = severity
+	}
 
 	if n.Severity != 0 {
 		t.FailNow()

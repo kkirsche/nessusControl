@@ -18,15 +18,17 @@ func (r *RiskRewriteValuesCriteria) RiskTextToNumber(risk string) (int, error) {
 	}
 }
 
-// CheckForUserDefinedPluginRisk checks if any of the user-provided criteria
+// IsSeverityDefinedForCriteria checks if any of the user-provided criteria
 // match the provided result row. If it does, this sets the new severity
-func CheckForUserDefinedPluginRisk(result *Nessus6ResultRow, pluginCriteria []RiskRewritePluginsCriteria) {
+func IsSeverityDefinedForCriteria(result *Nessus6ResultRow, pluginCriteria []RiskRewritePluginsCriteria) (bool, int) {
 	for _, criteria := range pluginCriteria {
 		ok, severity := criteria.ValidateCriteriaForPluginID(result.PluginID, result.ExternallyAccessible)
 		if ok {
-			result.Severity = severity
+			return true, severity
 		}
 	}
+
+	return false, 0
 }
 
 // ValidateCriteriaForPluginID converts checks if user supplied criteria matches. If
