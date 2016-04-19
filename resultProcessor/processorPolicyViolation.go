@@ -1,10 +1,32 @@
 package nessusProcessor
 
-// CheckForViolation checks for matches in the policyViolations section of the
+// IsPolicyViolation checks for matches in the policyViolations section of the
 // configuration file. This function checks for matches with the Plugin ID,
 // Port, Description Regular Expressions, organization ID, region ID and
 // external accessibility.
-func (p *PolicyViolationMatchCriteria) CheckForViolation(r *Nessus6ResultRow) bool {
+func IsPolicyViolation(result *Nessus6ResultRow, policyViolationsCriteria []PolicyViolationMatchCriteria) bool {
+	var violations []bool
+
+	for _, violationCriteria := range policyViolationsCriteria {
+		violations = append(violations, violationCriteria.IsPolicyViolationMatch(result))
+	}
+
+	policyViolation := true
+	for _, violation := range violations {
+		if !violation {
+			policyViolation = violation
+		}
+	}
+
+	return policyViolation
+
+}
+
+// IsPolicyViolationMatch checks for a match against the policy violation
+// criteria in the policyViolations section of the configuration file.
+// This function checks for matches with the Plugin ID, Port, Description
+// Regular Expressions, organization ID, region ID and external accessibility.
+func (p *PolicyViolationMatchCriteria) IsPolicyViolationMatch(r *Nessus6ResultRow) bool {
 	violation := false
 	results := []bool{}
 

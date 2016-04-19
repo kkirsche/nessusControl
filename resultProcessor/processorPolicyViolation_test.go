@@ -5,7 +5,7 @@ import (
 )
 
 var (
-	nessusResultRow = &Nessus6ResultRow{
+	nessusPolicyViolationResultRow = &Nessus6ResultRow{
 		PluginID:       71783,
 		CVE:            "CVE-2013-5211",
 		CVSS:           5,
@@ -23,7 +23,7 @@ var (
 		RegionID:       2,
 	}
 
-	positiveAnyMatchCriteria = &PolicyViolationMatchCriteria{
+	positiveAnyPolicyViolationMatchCriteria = &PolicyViolationMatchCriteria{
 		PluginID:                         71783,
 		ExternallyAccessible:             true,
 		Ports:                            []int{514, 123},
@@ -34,7 +34,7 @@ var (
 		CountIf: "any",
 	}
 
-	positiveAllMatchCriteria = &PolicyViolationMatchCriteria{
+	positiveAllPolicyViolationMatchCriteria = &PolicyViolationMatchCriteria{
 		PluginID:                         71783,
 		ExternallyAccessible:             true,
 		Ports:                            []int{514, 123},
@@ -45,7 +45,7 @@ var (
 		CountIf: "all",
 	}
 
-	positiveIgnoredAnyMatchCriteria = &PolicyViolationMatchCriteria{
+	positiveIgnoredAnyPolicyViolationMatchCriteria = &PolicyViolationMatchCriteria{
 		PluginID:                         71783,
 		ExternallyAccessible:             true,
 		Ports:                            []int{514, 123},
@@ -56,7 +56,7 @@ var (
 		CountIf: "any",
 	}
 
-	negativeAnyMatchCriteria = &PolicyViolationMatchCriteria{
+	negativeAnyPolicyViolationMatchCriteria = &PolicyViolationMatchCriteria{
 		PluginID:                         1234,
 		ExternallyAccessible:             false,
 		Ports:                            []int{1},
@@ -67,7 +67,7 @@ var (
 		CountIf: "any",
 	}
 
-	negativeAllMatchCriteria = &PolicyViolationMatchCriteria{
+	negativeAllPolicyViolationMatchCriteria = &PolicyViolationMatchCriteria{
 		PluginID:                         1234,
 		ExternallyAccessible:             false,
 		Ports:                            []int{1},
@@ -78,7 +78,7 @@ var (
 		CountIf: "all",
 	}
 
-	negativeIgnoredAnyMatchCriteria = &PolicyViolationMatchCriteria{
+	negativeIgnoredAnyPolicyViolationMatchCriteria = &PolicyViolationMatchCriteria{
 		PluginID:                         1234,
 		ExternallyAccessible:             false,
 		Ports:                            []int{1},
@@ -90,48 +90,48 @@ var (
 	}
 )
 
-func TestPositiveAnyMatchCheckForViolation(t *testing.T) {
-	violation := positiveAnyMatchCriteria.CheckForViolation(nessusResultRow)
+func TestPositiveAnyPolicyViolationMatchCheckForViolation(t *testing.T) {
+	violation := positiveAnyPolicyViolationMatchCriteria.IsPolicyViolationMatch(nessusPolicyViolationResultRow)
 
 	if !violation {
 		t.FailNow()
 	}
 }
 
-func TestNegativeAnyMatchCheckForViolation(t *testing.T) {
-	violation := negativeAnyMatchCriteria.CheckForViolation(nessusResultRow)
+func TestNegativeAnyPolicyViolationMatchCheckForViolation(t *testing.T) {
+	violation := negativeAnyPolicyViolationMatchCriteria.IsPolicyViolationMatch(nessusPolicyViolationResultRow)
 
 	if violation {
 		t.FailNow()
 	}
 }
 
-func TestPositiveAllMatchCheckForViolation(t *testing.T) {
-	violation := positiveAllMatchCriteria.CheckForViolation(nessusResultRow)
+func TestPositiveAllPolicyViolationMatchCheckForViolation(t *testing.T) {
+	violation := positiveAllPolicyViolationMatchCriteria.IsPolicyViolationMatch(nessusPolicyViolationResultRow)
 
 	if !violation {
 		t.FailNow()
 	}
 }
 
-func TestNegativeAllMatchCheckForViolation(t *testing.T) {
-	violation := negativeAllMatchCriteria.CheckForViolation(nessusResultRow)
+func TestNegativeAllPolicyViolationMatchCheckForViolation(t *testing.T) {
+	violation := negativeAllPolicyViolationMatchCriteria.IsPolicyViolationMatch(nessusPolicyViolationResultRow)
 
 	if violation {
 		t.FailNow()
 	}
 }
 
-func TestPositiveIgnoredAnyMatchCheckForViolation(t *testing.T) {
-	violation := positiveIgnoredAnyMatchCriteria.CheckForViolation(nessusResultRow)
+func TestPositiveIgnoredAnyPolicyViolationMatchCheckForViolation(t *testing.T) {
+	violation := positiveIgnoredAnyPolicyViolationMatchCriteria.IsPolicyViolationMatch(nessusPolicyViolationResultRow)
 
 	if violation {
 		t.FailNow()
 	}
 }
 
-func TestNegativeIgnoredAnyMatchCheckForViolation(t *testing.T) {
-	violation := negativeIgnoredAnyMatchCriteria.CheckForViolation(nessusResultRow)
+func TestNegativeIgnoredAnyPolicyViolationMatchCheckForViolation(t *testing.T) {
+	violation := negativeIgnoredAnyPolicyViolationMatchCriteria.IsPolicyViolationMatch(nessusPolicyViolationResultRow)
 
 	if violation {
 		t.FailNow()
