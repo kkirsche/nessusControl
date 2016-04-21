@@ -26,3 +26,10 @@ type Nessus6ResultRow struct {
 	RegionID             int
 	Severity             int
 }
+
+// Nessus6Scanner represents the information about the Nessus scanner
+type Nessus6Scanner struct {
+	IP             string
+	RegionID       int
+	OrganizationID int
+}
