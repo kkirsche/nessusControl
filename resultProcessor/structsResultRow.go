@@ -1,5 +1,7 @@
 package nessusProcessor
 
+import "time"
+
 // Nessus6ResultRow represents a single row of an exported CSV results file from
 // Tenable's Nessus 6.
 type Nessus6ResultRow struct {
@@ -21,11 +23,13 @@ type Nessus6ResultRow struct {
 	// Additional (Optional) Criteria. Usually only necessary in larger companies
 	ExternallyAccessible bool
 	FalsePositive        bool
+	PCIDSSAddress        bool
 	PolicyViolation      bool
 	ProtocolNumber       int
 	OrganizationID       int
 	RegionID             int
 	Severity             int
+	StartTime            time.Time
 }
 
 // Nessus6Scanner represents the information about the Nessus scanner

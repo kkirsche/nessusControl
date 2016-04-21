@@ -36,6 +36,14 @@ func ResultRowProcessorPipeline(scannerIP string,
 	if err != nil {
 		return err
 	}
+
+	scanner, err := RetrieveScannerOrganizationAndRegionID(scannerIP, db)
+	if err != nil {
+		return err
+	}
+
+	result.OrganizationID = scanner.OrganizationID
+
 	protoNumber := LookupProtocolNumberByProtocolString(result.Protocol)
 	if protoNumber == -1 {
 		return fmt.Errorf("This protocol's numeric representation could not be found.")
@@ -56,6 +64,18 @@ func ResultRowProcessorPipeline(scannerIP string,
 	result.FalsePositive, err = IsFalsePositive(result, falsePositiveCriteria, db)
 	if err != nil {
 		return err
+	}
+
+	result.PCIDSSAddress, err = IsOrgIDHostPairPCIDSSAddress(result, db)
+	if err != nil {
+		return err
+	}
+
+	if result.PCIDSSAddress && result.FalsePositive {
+		err := UpdateDBWithScannerDetectedException(result, db)
+		if err != nil {
+			return err
+		}
 	}
 
 	// EscapeString escapes special characters like "<" to become "&lt;".
