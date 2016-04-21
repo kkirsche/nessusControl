@@ -22,6 +22,7 @@ type Nessus6ResultRow struct {
 	ExternallyAccessible bool
 	FalsePositive        bool
 	PolicyViolation      bool
+	ProtocolNumber       int
 	OrganizationID       int
 	RegionID             int
 	Severity             int
