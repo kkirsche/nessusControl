@@ -18,10 +18,10 @@ type PolicyViolationMatchCriteria struct {
 // FalsePositiveMatchCriteria holds what criteria should be checked when
 // checking for a false positive.
 type FalsePositiveMatchCriteria struct {
-	PluginID            int
-	Ports               []int
-	Protocol            string
-	DescriptionRegexp   []string
-	CheckIfIsNotDefined bool
-	SQLSolarisCheck     bool
+	PluginID                 int
+	Ports                    []int
+	Protocol                 string
+	DescriptionRegexp        []string
+	IsIPWithinExternalRegion bool
+	SQLSolarisCheck          bool
 }
